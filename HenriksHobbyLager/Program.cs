@@ -7,15 +7,7 @@ namespace RefactoringExercise
     // Interfaces som jag kopierade från Stack Overflow. 
     // Ingen aning om vad de gör men folk säger att de är bra att ha!
     // TODO: Kolla upp vad interface betyder... 
-    public interface IRepository<T>
-    {
-        IEnumerable<T> GetAll();
-        T GetById(int id);
-        void Add(T entity);
-        void Update(T entity);
-        void Delete(int id);
-        IEnumerable<T> Search(Func<T, bool> predicate);
-    }
+    
 
     public interface IProductFacade
     {

@@ -1,6 +1,36 @@
-﻿namespace RefactoringExercise.Models;
+﻿using RefactoringExercise.Repositories;
+using Microsoft.EntityFrameworkCore.Sqlite;
+namespace RefactoringExercise.Models;
 
-public class Repository
+public class Repository: IRepository<Product>
 {
-    
+    public IEnumerable<Product> GetAll()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Product GetById(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Add(Product entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Update(Product entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Delete(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<Product> Search(Func<Product, bool> predicate)
+    {
+        throw new NotImplementedException();
+    }
 }
