@@ -613,3 +613,9 @@ FodyWeavers.xsd
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,linux,visualstudiocode,visualstudio,vim,notepadpp,rider,jetbrains+all
 
+/.vs/HenriksHobbyLager
+/HenriksHobbyLager/obj/Debug/net8.0
+
+# Visual Studio 2022-files
+.vs/
+=======
