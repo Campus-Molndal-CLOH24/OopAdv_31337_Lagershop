@@ -28,6 +28,11 @@ internal class SearchProducts
 {
 
     // TODO: Check this to add nullchecks and category.
+    // TODO: Add more search methods based on ?? when we see what we need to add?
+
+
+
+
     //    Console.WriteLine("Skriv in produkt-id: ");
     //    var productId = int.Parse(Console.ReadLine());
     //    var product = _productFacade.SearchProduct(productId);
