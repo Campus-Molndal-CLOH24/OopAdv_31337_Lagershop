@@ -2,24 +2,24 @@
 using Microsoft.EntityFrameworkCore.Sqlite;
 namespace RefactoringExercise.Models;
 
-public class Repository<T>: IRepository<T>
+public class Repository: IRepository<Product>
 {
-    public IEnumerable<T> GetAll()
+    public IEnumerable<Product> GetAll()
     {
         throw new NotImplementedException();
     }
 
-    public T GetById(int id)
+    public Product GetById(int id)
     {
         throw new NotImplementedException();
     }
 
-    public void Add(T entity)
+    public void Add(Product entity)
     {
         throw new NotImplementedException();
     }
 
-    public void Update(T entity)
+    public void Update(Product entity)
     {
         throw new NotImplementedException();
     }
@@ -29,7 +29,7 @@ public class Repository<T>: IRepository<T>
         throw new NotImplementedException();
     }
 
-    public IEnumerable<T> Search(Func<T, bool> predicate)
+    public IEnumerable<Product> Search(Func<Product, bool> predicate)
     {
         throw new NotImplementedException();
     }
