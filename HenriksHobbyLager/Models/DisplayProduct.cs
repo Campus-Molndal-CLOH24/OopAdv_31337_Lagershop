@@ -1,4 +1,4 @@
-﻿namespace RefactoringExercise.Models;
+﻿namespace HenriksHobbylager.Models;
 
 public class DisplayProduct
 {

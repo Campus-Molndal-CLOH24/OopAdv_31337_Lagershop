@@ -1,9 +1,11 @@
 ﻿using System;
+using HenriksHobbylager.Models;
+using HenriksHobbylager.Repositories;
 
-namespace RefactoringExercise.Facades;
+namespace HenriksHobbylager.Facades;
 
-using RefactoringExercise.Models;
-using RefactoringExercise.Repositories;
+using HenriksHobbylager.Models;
+using HenriksHobbylager.Repositories;
 using System.Collections;
 
 internal class ProductFacade : IProductFacade
@@ -11,7 +13,7 @@ internal class ProductFacade : IProductFacade
 	private readonly IRepository<Product> _productRepository;
     private int _nextId = 1; // Start ID counter from 1
 
-    public ProductFacade(IAsyncResult<Product> productRepository)
+    public ProductFacade(IAsyncResult productRepository)
     {
         _productRepository = productRepository;
     }
