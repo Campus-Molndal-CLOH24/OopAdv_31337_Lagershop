@@ -1,4 +1,4 @@
-﻿using System;
+﻿/* using System;
 using HenriksHobbyLager.Data;
 using HenriksHobbylager.Models;
 // using HenriksHobbylager.UI;
@@ -19,5 +19,22 @@ namespace HenriksHobbylager
             var repository = new Repository();
             repository.CreateProduct(new Product());
         }
+    }
+} */
+
+
+
+using HenriksHobbylager.Data;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        using var context = new AppDbContext();
+
+        // Skapa databasen och tabeller
+        context.Database.EnsureCreated();
+
+        Console.WriteLine("Databasen och tabeller har skapats i mappen 'Data'.");
     }
 }

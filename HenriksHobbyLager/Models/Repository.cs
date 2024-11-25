@@ -1,4 +1,4 @@
-﻿using HenriksHobbyLager.Data;
+﻿/* using HenriksHobbyLager.Data;
 using HenriksHobbylager.Repositories;
 using Microsoft.EntityFrameworkCore.Sqlite;
 namespace HenriksHobbylager.Models;
@@ -56,4 +56,4 @@ public class Repository: IRepository<Product>
         throw new NotImplementedException();
     }
     
-}
+} */
