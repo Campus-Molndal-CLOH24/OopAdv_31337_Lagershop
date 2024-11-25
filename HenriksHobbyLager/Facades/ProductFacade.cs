@@ -9,8 +9,9 @@ using System.Collections;
 internal class ProductFacade : IProductFacade
 {
 	private readonly IRepository<Product> _productRepository;
+    private int _nextId = 1; // Start ID counter from 1
 
-	public ProductFacade(IAsyncResult<Product> productRepository)
+    public ProductFacade(IAsyncResult<Product> productRepository)
     {
         _productRepository = productRepository;
     }
@@ -19,9 +20,11 @@ internal class ProductFacade : IProductFacade
     {
         var product = new Product
         {
+            Id = _nextId++,
             Name = productName,
             Quantity = productQuantity,
             Price = productPrice
+            Created = DateTime.Now
         };
         _productRepository.Add(product);
     }
