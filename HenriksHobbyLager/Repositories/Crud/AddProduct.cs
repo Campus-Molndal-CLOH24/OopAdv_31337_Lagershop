@@ -1,4 +1,4 @@
-﻿namespace HenriksHobbylager.Models;
+﻿namespace HenriksHobbylager.Repositories.Crud;
 
 private void AddProduct()
 {
