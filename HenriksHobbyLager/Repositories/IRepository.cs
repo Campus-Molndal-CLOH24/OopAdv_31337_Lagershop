@@ -1,4 +1,4 @@
-﻿namespace RefactoringExercise.Repositories;
+﻿namespace HenriksHobbylager.Repositories;
 
 
     public interface IRepository<T>

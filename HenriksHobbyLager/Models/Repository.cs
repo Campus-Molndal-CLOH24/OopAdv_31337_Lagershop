@@ -1,6 +1,6 @@
-﻿using RefactoringExercise.Repositories;
+﻿using HenriksHobbylager.Repositories;
 using Microsoft.EntityFrameworkCore.Sqlite;
-namespace RefactoringExercise.Models;
+namespace HenriksHobbylager.Models;
 
 public class Repository: IRepository<Product>
 {
