@@ -5,6 +5,35 @@
 3. **`IProductFacade`**: Är en nyckelkomponent som centraliserar alla metoder för produktåtkomst och manipulation.
 4. **Program**: Central klass som kopplar UI (`Menu`) och databasen.
 
+### UML-diagram Flowchart.
+```mermaid
+flowchart TD
+    Program -->|Startar applikationen| Menu
+    Menu -->|Användarens val| Facade["IProductFacade"]
+    
+    Facade -->|CRUD-operationer| Repository["Repository<T>"]
+    Repository -->|Använder| AppDbContext
+    AppDbContext -->|Hanterar databas| SQLite["SQLite-databas"]
+
+    subgraph FacadeLayer ["Facade & Operativa klasser"]
+        Facade --> AddProduct
+        Facade --> DeleteProduct
+        Facade --> DisplayProduct
+        Facade --> SearchProducts
+        Facade --> ShowAllProducts
+        Facade --> UpdateProduct
+    end
+
+    subgraph RepositoryLayer ["Repository Pattern"]
+        Repository --> Product
+    end
+
+    subgraph DataLayer ["Data & Entiteter"]
+        Product --> SQLite
+    end
+```
+
+### UML-diagram Klassdiagram.
 ```mermaid
 classDiagram
 direction TB
@@ -99,3 +128,31 @@ IProductFacade <|-- UpdateProduct
 IRepository~T~ <|-- Repository~T~
 Repository~T~ --> AppDbContext
 Repository~T~ --> Product
+```
+
+### ER-diagram Entitetsrelation.
+```mermaid
+erDiagram
+Product {
+int Id PK
+string Name
+int Quantity
+decimal Price
+string Description
+}
+
+    Order {
+        int Id PK
+        datetime OrderDate
+        decimal TotalPrice
+    }
+
+    OrderItem {
+        int Id PK
+        int Quantity
+        decimal SubTotal
+    }
+
+    Product ||--o{ OrderItem : "Länk till Orderns produkter"
+    Order ||--o{ OrderItem : "Länk till produkter i en Order"
+```
