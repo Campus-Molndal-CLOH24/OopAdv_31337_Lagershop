@@ -7,8 +7,7 @@
 
 ## Kodare
 
-- 
-- 
-- 
-- 
-- 
+- Fredrik Svärd, team lead
+- Megan Selvidge, awsomesauce
+- Andreas Vilhelmsson, kickassmeow
+- Niklas Häll, swashbuckler
