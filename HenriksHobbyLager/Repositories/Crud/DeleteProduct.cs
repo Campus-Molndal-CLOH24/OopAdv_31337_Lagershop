@@ -1,5 +1,5 @@
 
-﻿// namespace HenriksHobbylager.Models;
+// namespace HenriksHobbylager.Models;
 //
 // public class DeleteProduct
 // {
@@ -19,4 +19,3 @@
 //     // }
 //     _productFacade.DeleteProduct(productId);
 // }
->>>>>>> 18d5b0e (WIP 2)
