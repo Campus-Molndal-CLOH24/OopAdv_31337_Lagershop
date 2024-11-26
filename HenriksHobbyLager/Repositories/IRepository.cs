@@ -1,4 +1,4 @@
-﻿using System;
+﻿/* using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -15,3 +15,4 @@ public interface IRepository<T> where T : class
 	IEnumerable<T> GetAll();
 	IEnumerable<T> Search(Func<T, bool> predicate);
 }
+ */

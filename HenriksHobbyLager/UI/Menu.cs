@@ -1,4 +1,4 @@
-namespace HenriksHobbylager.UI;
+/* namespace HenriksHobbylager.UI;
 
 using Facades;
 
@@ -49,4 +49,4 @@ internal class Menu
             }
         }
     }
-}
+} */

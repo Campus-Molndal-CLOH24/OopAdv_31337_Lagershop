@@ -1,5 +1,5 @@
-namespace HenriksHobbylager.Repositories.Crud;
-
+/* namespace HenriksHobbylager.Repositories.Crud; */
+/* 
 public class UpdateProduct
 {
         Console.WriteLine("Skriv in produkt-id: ");
@@ -10,8 +10,8 @@ public class UpdateProduct
         var productQuantity = int.Parse(Console.ReadLine());
         Console.WriteLine("Skriv in priset på produkten: ");
         var productPrice = decimal.Parse(Console.ReadLine());
-        _productFacade.UpdateProduct(productId, productName, productQuantity, productPrice);
+        _productFacade.UpdateProduct(productId, productName, productQuantity, productPrice); */
 
-        // TODO: Add LINQ?
+// TODO: Add LINQ?
 
-}
+//}

@@ -1,4 +1,4 @@
-﻿namespace HenriksHobbylager.Models;
+﻿/* namespace HenriksHobbylager.Models;
 
 private void CreateProduct(Product product)
 {
@@ -8,9 +8,9 @@ private void CreateProduct(Product product)
     var category = Console.ReadLine();
     Console.WriteLine("Skriv in antal: ");
     var productQuantity = int.Parse(Console.ReadLine());
-    Console.WriteLine("Skriv in priset på produkten: ");
-    var productPrice = decimal.Parse(Console.ReadLine());
-    // _productFacade.AddProduct(productName, productQuantity, productPrice);
+    Console.Writ/*  eLine("Skriv in priset på produkten: ");
+    var productPrice = decimal.Parse(Console.ReadLine()); 
+     _productFacade.AddProduct(productName, productQuantity, productPrice);
 
     Console.WriteLine("Skriv in priset på produkten: ");
     if (!decimal.TryParse(Console.ReadLine(), out var productPrice))
@@ -33,3 +33,4 @@ private void CreateProduct(Product product)
     _repository.CreateProduct(product);
     Console.WriteLine($"Produkten {product.Name} har lagts till i databasen.");
 }
+*/
