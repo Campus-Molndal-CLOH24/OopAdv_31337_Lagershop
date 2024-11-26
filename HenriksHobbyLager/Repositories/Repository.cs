@@ -1,14 +1,10 @@
-﻿
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using HenriksHobbylager.Data;
+using HenriksHobbylager.Models;
 using HenriksHobbylager.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Sqlite;
-namespace HenriksHobbylager.Models;
 
-// This is the abstractionlayer.
-
-public class Repository: IRepository<Product>
+public class Repository : IRepository<Product>
 {
     private readonly AppDbContext _context;
     private readonly DbSet<Product> _dbSet;
@@ -18,51 +14,70 @@ public class Repository: IRepository<Product>
         _context = context;
         _dbSet = _context.Set<Product>();
     }
-    
-    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
+
+    public async Task AddAsync(Product entity)
+    {
+        if (!await _dbSet.AnyAsync(p => p.Name == entity.Name))
         {
-           return await _dbSet.ToListAsync(); 
+            await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
-   
+        else
+        {
+            Console.WriteLine("Produkten finns redan i databasen.");
+        }
+    }
+
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
 
     public async Task<Product?> GetByIdAsync(int id)
     {
-      return await _dbSet.FindAsync(id);
+        return await _dbSet.FindAsync(id);
     }
-
 
     
-
-    public void CreateProduct(Product product)
+    public async Task<IEnumerable<Product>> GetAllAsync(Func<Product, bool> predicate)
     {
-         if (!_context.Products.Any(p => p.Name == product.Name))
-         {
-            _context.Products.Add(product);
-            _context.SaveChanges();
-         }
-         else 
-         { Console.WriteLine("Produkten finns redan i databasen.");
-         }
+        return await Task.FromResult(_dbSet.Where(predicate).AsEnumerable());
     }
 
-    public void Update(Product entity)
+    public async Task SaveChangesAsync()
     {
-       _dbSet.Update(entity);
+        await _context.SaveChangesAsync();
     }
 
-    public void Delete(int id)
-    { 
-        _dbSet.Remove(_dbSet.Find(id));
-    }
-
-
-    public IEnumerable<Product> Search(Func<Product, bool> predicate)
+    public async Task UpdateAsync(Product entity)
     {
-        return _dbSet.Where(predicate);
+        _dbSet.Update(entity);
+        await _context.SaveChangesAsync();
     }
 
-    public Task SaveChangesAsync()
+    public async Task DeleteAsync(int id)
     {
-        return _context.SaveChangesAsync();
+        var entity = await _dbSet.FindAsync(id);
+        if (entity != null)
+        {
+            _dbSet.Remove(entity);
+            await _context.SaveChangesAsync();
+        }
     }
-} 
+
+    public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
+    {
+        return await _dbSet.Where(predicate).ToListAsync();
+    }
+
+    public async Task DeleteAsync(Product entity)
+    {
+        _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
+    {
+        return await _dbSet.Where(predicate).ToListAsync();
+    }
+}
