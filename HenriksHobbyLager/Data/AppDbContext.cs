@@ -2,6 +2,7 @@
 
 using HenriksHobbylager.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.IO;
 
 namespace HenriksHobbylager.Data
@@ -9,32 +10,30 @@ namespace HenriksHobbylager.Data
     public class AppDbContext : DbContext
     {
         public DbSet<Product> Products { get; set; }
-
         public string DbPath { get; }
 
  public AppDbContext()
         {
-            // Get the base path of the project
-            var projectBasePath = Path.Combine(Directory.GetCurrentDirectory(), "Data");
+            // Read the connection string from appsettings.json
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
 
-            // Create the directory if it does not exist
-            if (!Directory.Exists(projectBasePath))
+            // Get the path to the database
+            var relativeDbPath = configuration.GetSection("ConnectionStrings:DatabasePath").Value;
+            var projectBasePath = Path.Combine(Directory.GetCurrentDirectory(), relativeDbPath);
+
+            // Create the directory if it doesn't exist
+            var dbDirectory = Path.GetDirectoryName(projectBasePath);
+            if (!Directory.Exists(dbDirectory))
             {
-                Directory.CreateDirectory(projectBasePath);
+                Directory.CreateDirectory(dbDirectory);
             }
 
-            // Set the path to the database
-            DbPath = Path.Combine(projectBasePath, "hobbylager.db");
+            DbPath = projectBasePath;
 
-            // Check if the database already exists, do not overwrite it if it does.
-            if (File.Exists(DbPath))
-            {
-                Console.WriteLine($"Databasen finns redan här: {DbPath}");
-            }
-            else
-            {
-                Console.WriteLine($"Skapar ny databas här: {DbPath}");
-            }
+            Console.WriteLine($"Databasen skapas här: {DbPath}");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
