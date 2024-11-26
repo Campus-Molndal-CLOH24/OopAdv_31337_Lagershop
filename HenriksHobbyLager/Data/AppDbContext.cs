@@ -1,13 +1,30 @@
-﻿namespace HenriksHobbyLager.Data;
-using Microsoft.EntityFrameworkCore;
+﻿
+
 using HenriksHobbylager.Models;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
 
-public class AppDbContext : DbContext
+namespace HenriksHobbylager.Data
 {
-    public DbSet<Product>? Product { get; set; }
+    public class AppDbContext : DbContext
+    {
+        public DbSet<Product> Products { get; set; } // Lägg till denna rad
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-        => options.UseSqlite("Data Source=Data/henrikshobbylager.db");
+        public string DbPath { get; }
 
+        public AppDbContext()
+        {
+            var folder = Path.Combine(AppContext.BaseDirectory, "Data");
+            if (!Directory.Exists(folder))
+            {
+                Directory.CreateDirectory(folder);
+            }
+            DbPath = Path.Combine(folder, "hobbylager.db");
+
+            Console.WriteLine($"Databasen skapas här: {DbPath}");
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder options)
+            => options.UseSqlite($"Data Source={DbPath}");
+    }
 }
-
