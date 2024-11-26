@@ -8,20 +8,33 @@ namespace HenriksHobbylager.Data
 {
     public class AppDbContext : DbContext
     {
-        public DbSet<Product> Products { get; set; } // Lägg till denna rad
+        public DbSet<Product> Products { get; set; }
 
         public string DbPath { get; }
 
-        public AppDbContext()
+ public AppDbContext()
         {
-            var folder = Path.Combine(AppContext.BaseDirectory, "Data");
-            if (!Directory.Exists(folder))
-            {
-                Directory.CreateDirectory(folder);
-            }
-            DbPath = Path.Combine(folder, "hobbylager.db");
+            // Get the base path of the project
+            var projectBasePath = Path.Combine(Directory.GetCurrentDirectory(), "Data");
 
-            Console.WriteLine($"Databasen skapas här: {DbPath}");
+            // Create the directory if it does not exist
+            if (!Directory.Exists(projectBasePath))
+            {
+                Directory.CreateDirectory(projectBasePath);
+            }
+
+            // Set the path to the database
+            DbPath = Path.Combine(projectBasePath, "hobbylager.db");
+
+            // Check if the database already exists, do not overwrite it if it does.
+            if (File.Exists(DbPath))
+            {
+                Console.WriteLine($"Databasen finns redan här: {DbPath}");
+            }
+            else
+            {
+                Console.WriteLine($"Skapar ny databas här: {DbPath}");
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
