@@ -4,12 +4,14 @@ using HenriksHobbylager.Models;
 using HenriksHobbylager.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-public class Repository : IRepository<Product>
+namespace HenriksHobbyLager.Repositories;
+
+public class SQLiteRepository : IRepository<Product>
 {
-    private readonly AppDbContext _context;
+    private readonly SQLiteDbContext _context;
     private readonly DbSet<Product> _dbSet;
 
-    public Repository(AppDbContext context)
+    public SQLiteRepository(SQLiteDbContext context)
     {
         _context = context;
         _dbSet = _context.Set<Product>();
