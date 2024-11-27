@@ -1,86 +1,81 @@
-// using System;
-// using System.Collections;
-// using System.Collections.Generic;
-// using System.Linq;
-//
-// namespace HenriksHobbylager.Repositories.Crud;
-//
-// internal class SearchProducts
-// {
-//     private readonly IProductFacade _productFacade;
-//     {
-//         _productFacade = productFacade;
-//     }
-//
-//     internal void ExecuteSearch()
-//     {
-//         Console.WriteLine("Skriv in söktermen (namn eller kategori): ");
-//         var searchTerm = Console.ReadLine().ToLower();
-//
-//         IEnumerable<Product> products;
-//
-//         if searchTerm != null ? products = _productFacade.SearchProduct(searchTerm) : products = _productFacade.GetAllProducts();
-//         else
-//         {
-//             Console.WriteLine("Produkten hittades inte.");
-//         }
-//     }
-// {
 
-    // TODO: Check this to add nullchecks and category.
-    //    Console.WriteLine("Skriv in produkt-id: ");
-    //    var productId = int.Parse(Console.ReadLine());
-    //    var product = _productFacade.SearchProduct(productId);
+using HenriksHobbylager.Models;
 
-//    Console.WriteLine("Skriv in söktermen (namn eller id): ");
-//var searchTerm = int.Parse(Console.ReadLine());
+namespace HenriksHobbylager.Repositories.Crud
+{
+    internal class SearchProducts
+    {
+        private readonly IRepository<Product> _repository = null!;
 
-//    var product = _productFacade.SearchProduct(searchTerm);
-//if (product.Any())
+        internal SearchProducts(IRepository<Product> repository)
+        {
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        }
 
+        internal async Task ExecuteSearchAsync()
+        {
+            try
+            {
+                Console.WriteLine("Vill du söka efter (1) Produktnamn eller (2) Kategori?");
+                Console.Write("Ange ditt val (1 eller 2): ");
+                var searchChoice = Console.ReadLine()?.Trim();
 
-//    foreach (var product in product)
-//    {
-//        Console.WriteLine($"Produktens id: {product.Id}");
-//        Console.WriteLine($"Produktens namn: {product.Name}");
-//        Console.WriteLine($"Produktens antal: {product.Quantity}");
-//        Console.WriteLine($"Produktens pris: {product.Price}");
-//        Console.WriteLine($"Skapad: {product.Created}");
-//        Console.WriteLine();
-//    }
-//}
-//else
-//{
-//    Console.WriteLine("Inga produkter matchade din sökning.");
-//}
+                IEnumerable<Product> products = Enumerable.Empty<Product>();
 
-//if (product != null)
-//    {
-//        Console.WriteLine($"Produktens namn: {product.Name}");
-//        Console.WriteLine($"Produktens antal: {product.Quantity}");
-//        Console.WriteLine($"Produktens pris: {product Price}");
+                switch (searchChoice)
+                {
+                    case "1":
+                        Console.Write("Skriv in produktens namn: ");
+                        var productName = Console.ReadLine()?.Trim();
+                        if (!string.IsNullOrEmpty(productName))
+                        {
+                            // Search for product by name
+                            products = await _repository.SearchAsync(p =>
+                        p.Name.Contains(productName, StringComparison.OrdinalIgnoreCase));
+                        }
+                        else
+                        {
+                            Console.WriteLine("Produktens namn kan inte vara tomt.");
+                        }
+                        break;
 
-//    }
-//    else
-//    {
-//        Console.WriteLine("Produkten hittades inte.");
-//    }
+                    case "2":
+                        Console.Write("Skriv in produktkategori: ");
+                        var category = Console.ReadLine()?.Trim();
+                        if (!string.IsNullOrEmpty(category))
+                        {
+                            products = await _repository.SearchAsync(p =>
+                        p.Category.Contains(category, StringComparison.OrdinalIgnoreCase));
+                        }
+                        else
+                        {
+                            Console.WriteLine("Produktens kategori kan inte vara tom.");
+                        }
+                        break;
 
-//     // LINQ igen! Kollar både namn och kategori
-//     var results = _products.Where(p =>
-//         p.Name.ToLower().Contains(searchTerm) ||
-//         p.Category.ToLower().Contains(searchTerm)
-//     ).ToList();
+                    default:
+                        Console.WriteLine("Ogiltigt val. Välj 1 eller 2.");
+                        return;
+                }
 
-// TODO: Check to add more maby?
-// Snygga streck som separerar produkterna
-// Console.WriteLine($"\nID: {product.Id}");
-// Console.WriteLine($"Namn: {product.Name}");
-// Console.WriteLine($"Pris: {product.Price:C}");  // :C gör att det blir kronor automatiskt!
-// Console.WriteLine($"Lager: {product.Stock}");
-// Console.WriteLine($"Kategori: {product.Category}");
-// Console.WriteLine($"Skapad: {product.Created}");
-// if (product.LastUpdated.HasValue)  // Kollar om produkten har uppdaterats någon gång
-//     Console.WriteLine($"Senast uppdaterad: {product.LastUpdated}");
-// Console.WriteLine(new string('-', 40));  // Snyggt streck mellan produkterna
-//}
+                // Display search results
+                if (products.Any())
+                {
+                    foreach (var product in products)
+                    {
+                        Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, " +
+                            $"Kategori: {product.Category}, Pris: {product.Price:C}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Inga produkter matchade din sökning.");
+                }
+            }
+            catch (Exception searchFail)
+            {
+                Console.WriteLine($"Ett fel uppstod: {searchFail.Message}. Vänligen försök igen senare.");
+            }
+        }
+    }
+}
