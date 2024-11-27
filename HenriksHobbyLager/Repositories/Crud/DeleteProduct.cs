@@ -5,41 +5,38 @@ namespace HenriksHobbylager.Repositories.Crud;
 public class DeleteProduct
 {
     private readonly IRepository<Product> _repository;
-    private Repository repository;
 
     public DeleteProduct(IRepository<Product> repository)
     {
-        _repository = repository;
-    }
-
-    public DeleteProduct(Repository repository)
-    {
-        this.repository = repository;
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
     public async Task DeleteProductAsync()
     {
         try
         {
-            Console.WriteLine("Ange produkt som du vill ta bort: ");
-            // Sök först produkten - kan vi återanvända koden från SearchProduct.cs?
-            string deleteProductInput = Console.ReadLine();
-            var searchProductToDelete = await _repository.SearchAsync(deleteProductInput);
+            Console.WriteLine("Ange produktnamn som du vill ta bort: ");
+            var productName = Console.ReadLine();
 
-            // Returnera/Skriv ut om produkten finns och hur många som finns
-            if (searchProductToDelete != null)
+            if (string.IsNullOrWhiteSpace(productName))
             {
-                // returnera en lista på vad och hur många som finns
-                var productName = searchProductToDelete.Name;
-                var productAmount = searchProductToDelete.Stock;
-                Console.WriteLine($"Det finns {productAmount} stycken av {productName}.");
-                Console.WriteLine("Hur många vill du ta bort?");
-                string? deleteAmountInput = Console.ReadLine();
+                Console.WriteLine("Produktnamn kan inte vara tomt.");
                 return;
             }
-            else
+
+            var products = await _repository.SearchAsync(p =>
+                p.Name.Contains(productName, StringComparison.OrdinalIgnoreCase));
+
+            if (!products.Any())
             {
-                // Om produkten inte finns, skriv ut att produkten inte finns: DUH! :o
+                Console.WriteLine("Ingen produkt matchade söktermen.");
+                return;
+            }
+
+            foreach (var product in products)
+            {
+                await _repository.DeleteAsync(product);
+                Console.WriteLine($"Produkten {product.Name} togs bort.");
             }
         }
         catch (Exception exProductDelete)
@@ -48,24 +45,3 @@ public class DeleteProduct
         }
     }
 }
-
-// namespace HenriksHobbylager.Repositories.Crud;
-//
-// public class DeleteProduct
-// {
-//     Console.WriteLine("Skriv in produkt-id: ");
-//     // TODO: Look this over.
-//
-//     if (!int.TryParse(Console.ReadLine(), out int id))
-//     {
-//         Console.WriteLine("Ogiltigt ID! Bara siffror är tillåtna här.");
-//         return;
-//     }
-//     var productId = int.Parse(Console.ReadLine());
-//     if (product == null)
-//     {
-//         Console.WriteLine("Produkt hittades inte! Puh, inget blev raderat av misstag!");
-//         return;
-//     }
-//     _productFacade.DeleteProduct(productId);
-// }

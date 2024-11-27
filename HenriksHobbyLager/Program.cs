@@ -3,19 +3,18 @@ using HenriksHobbylager.UI;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         // Create the database and tables if they don't exist.
         using var context = new AppDbContext();
         context.Database.EnsureCreated();
 
-        // TODO: Fix the menu..
-        // Start the application.
-
+        // Create a repository and a facade to handle the CRUD operations.
         var productRepository = new Repository(context);
         var productFacade = new ProductFacade(productRepository);
 
+        // Show the main menu.
         var menu = new Menu();
-        menu.ShowMenu(productFacade);
+        await menu.ShowMenu(productFacade);
     }
 }

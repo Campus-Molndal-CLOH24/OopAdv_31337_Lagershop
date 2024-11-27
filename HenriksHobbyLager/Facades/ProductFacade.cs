@@ -11,6 +11,8 @@ internal class ProductFacade : IProductFacade
         _productRepository = productRepository;
     }
 
+    // Sorting methods alphabetically for easier reading
+
     public async Task CreateProductAsync(string productName, int productStock, decimal productPrice)
     {
         var product = new Product
@@ -32,17 +34,9 @@ internal class ProductFacade : IProductFacade
         await _productRepository.DeleteAsync(productId);
     }
 
-    public async Task UpdateProductAsync(int productId, string productName, int productQuantity, decimal productPrice)
+    public async Task<IEnumerable<Product>> GetAllProductsAsync()
     {
-        var product = await _productRepository.GetByIdAsync(productId);
-        if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
-        
-        product.Name = productName;
-        product.Stock = productQuantity;
-        product.Price = productPrice;
-        product.LastUpdated = DateTime.Now;
-
-        await _productRepository.UpdateAsync(product);
+        return await _productRepository.GetAllAsync(p => true);
     }
 
     public async Task<Product> SearchProductAsync(int productId)
@@ -59,8 +53,16 @@ internal class ProductFacade : IProductFacade
             p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
     }
 
-    public async Task<IEnumerable<Product>> GetAllProductsAsync()
+    public async Task UpdateProductAsync(int productId, string productName, int productQuantity, decimal productPrice)
     {
-        return await _productRepository.GetAllAsync(p => true);
+        var product = await _productRepository.GetByIdAsync(productId);
+        if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
+
+        product.Name = productName;
+        product.Stock = productQuantity;
+        product.Price = productPrice;
+        product.LastUpdated = DateTime.Now;
+
+        await _productRepository.UpdateAsync(product);
     }
 }

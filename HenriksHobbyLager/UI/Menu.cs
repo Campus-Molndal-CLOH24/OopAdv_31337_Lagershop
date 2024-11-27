@@ -5,9 +5,9 @@ using HenriksHobbylager.Repositories.Crud;
 
 internal class Menu
 {
-    private IProductFacade _productFacade;
+    private IProductFacade _productFacade = null!;
 
-    internal void ShowMenu(IProductFacade productFacade)
+    internal async Task ShowMenu(IProductFacade productFacade)
     {
         _productFacade = productFacade;
 
@@ -18,33 +18,30 @@ internal class Menu
             Console.WriteLine("3. Uppdatera en produkt");
             Console.WriteLine("4. Sök igenom produkterna");
             Console.WriteLine("5. Visa alla produkterna");
-            // TODO: Ta bort en produktkategori?
+            // TODO: "6. Ta bort en produktkategori" ?
             Console.WriteLine("0. Avsluta");
             Console.WriteLine("Välj ett alternativ: ");
 
-            var option = Console.ReadLine();
-            switch (option)
+            var menuOption = Console.ReadLine();
+            switch (menuOption)
             {
                 case "1":
-                    MenuChoiceOne();
+                    await MenuChoiceOne();
                     break;
                 case "2":
-                    MenuChoiceTwo();
+                    await MenuChoiceTwo();
                     break;
                 case "3":
                     // TODO: Needs parameters to work, make connections to CRUD.
-                    // _productFacade.UpdateProductAsync();
                     break;
                 case "4":
                     await MenuChoiceFour();
                     break;
                 case "5":
                     // TODO: Needs parameters to work, make connections to CRUD.
-                    // _productFacade.GetAllProductsAsync();
                     break;
                 case "6":
                     // TODO: Needs parameters to work, make connections to CRUD.
-                    // _productFacade.GetAllProductsAsync();
                     break;
                 case "0":
                     // TODO: Needs parameters to work, make connections to CRUD.
@@ -53,13 +50,13 @@ internal class Menu
                     Environment.Exit(0);
                     break;
                 default:
-                    Console.WriteLine("Felaktigt val. Välj mellan alternativ 1-6.");
+                    Console.WriteLine("Felaktigt val. Välj mellan alternativ 1-5, eller 0 för att avsluta.");
                     break;
             }
         }
     }
 
-    private async void MenuChoiceOne()
+    private async Task MenuChoiceOne()
     {
         try
         {
@@ -73,7 +70,7 @@ internal class Menu
         }
     }
 
-    private async void MenuChoiceTwo()
+    private async Task MenuChoiceTwo()
     {
         try
         {

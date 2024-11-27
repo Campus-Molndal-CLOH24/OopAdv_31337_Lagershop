@@ -4,18 +4,19 @@ namespace HenriksHobbylager.Repositories.Crud;
 
 public class CreateProduct
 {
-    private readonly IRepository<Product> _repository;
-    private Repository repository;
+    private readonly IRepository<Product> _repository = null!;
+    // private readonly Repository repository;
 
     public CreateProduct(IRepository<Product> repository)
     {
-        _repository = repository;
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
-    public CreateProduct(Repository repository)
-    {
-        this.repository = repository;
-    }
+    // Constructor chaining: allow for the use of the repository while trying to reduce repeated use of the this keyword
+    //public CreateProduct(Repository repository) : this((IRepository<Product>)repository)
+    //{
+    //    this.repository = repository;
+    //}
 
     public async Task CreateProductAsync()
     {
@@ -31,15 +32,13 @@ public class CreateProduct
             if (string.IsNullOrWhiteSpace(category))
                 throw new ArgumentException("Kategorin får inte vara tom. :)");
 
-            Console.WriteLine("Ange antal: ");
-            var productStock = int.Parse(Console.ReadLine());
-            if (productStock < 0)
-                throw new ArgumentException("Lagersaldo får inte vara negativt. :(");
+            Console.Write("Ange antal: ");
+            if (!int.TryParse(Console.ReadLine(), out var productStock) || productStock < 0)
+                throw new ArgumentException("Lagersaldo måste vara ett giltigt icke-negativt tal.");
 
-            Console.WriteLine("Ange pris: ");
-            var productPrice = decimal.Parse(Console.ReadLine());
-            if (productPrice <= 0)
-                throw new ArgumentException("Priset måste vara mer än noll! Ger du bort alla helikoptrar?!");
+            Console.Write("Ange pris: ");
+            if (!decimal.TryParse(Console.ReadLine(), out var productPrice) || productPrice <= 0)
+                throw new ArgumentException("Priset måste vara ett giltigt positivt tal.");
 
             var product = new Product
             {
