@@ -12,28 +12,33 @@ namespace HenriksHobbylager.Data
         public DbSet<Product> Products { get; set; }
         public string DbPath { get; }
 
- public AppDbContext()
+    public AppDbContext()
         {
-            // Read the connection string from appsettings.json
+            // Read the connection string from appsettings and get the path to the database.
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            // Get the path to the database
-            var relativeDbPath = configuration.GetSection("ConnectionStrings:DatabasePath").Value;
-            var projectBasePath = Path.Combine(Directory.GetCurrentDirectory(), relativeDbPath);
+            var projectBasePath = configuration.GetSection("ConnectionStrings:DatabasePath").Value;
 
-            // Create the directory if it doesn't exist
-            var dbDirectory = Path.GetDirectoryName(projectBasePath);
-            if (!Directory.Exists(dbDirectory))
+            if (File.Exists(DbPath)) // Check if the database file exists in the project directory.
             {
-                Directory.CreateDirectory(dbDirectory);
+                var dbDirectory = Path.GetDirectoryName(projectBasePath);
+                
+                if (!Directory.Exists(dbDirectory)) // Create the directory if it doesn't exist.
+                {
+                    Directory.CreateDirectory(dbDirectory);
+                }
+
+                DbPath = projectBasePath;
+                Console.WriteLine($"Databasen skapas här: {DbPath}");
+            } else
+            {
+                DbPath = projectBasePath;
+                Console.WriteLine($"Databasen hittades här: {DbPath}");
             }
-
-            DbPath = projectBasePath;
-
-            Console.WriteLine($"Databasen skapas här: {DbPath}");
+            
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
