@@ -17,28 +17,38 @@ internal class Menu
         Console.WriteLine("3. Uppdatera en produkt");
         Console.WriteLine("4. Sök igenom produkterna");
         Console.WriteLine("5. Visa alla produkterna");
-        Console.WriteLine("6. Avsluta");
+        Console.WriteLine("0. Avsluta");
         Console.WriteLine("Välj ett alternativ: ");
 
         var option = Console.ReadLine();
         switch (option)
         {
             case "1":
-                    IProductFacade.AddProduct();
+                // TODO: Needs parameters to work, make connections to CRUD.
+                // _productFacade.CreateProductAsync();
                 break;
             case "2":
-                    IProductFacade.DeleteProduct();
+                // TODO: Needs parameters to work, make connections to CRUD.
+                // _productFacade.DeleteProductAsync();
                 break;
             case "3":
-                    IProductFacade.UpdateProduct();
+                // TODO: Needs parameters to work, make connections to CRUD.
+                // _productFacade.UpdateProductAsync();
                 break;
             case "4":
-                IProductFacade.SearchProduct();
+                // TODO: Needs parameters to work, make connections to CRUD.
+                // _productFacade.SearchProductAsync();
                 break;
             case "5":
-                    IProductFacade.ShowAllProducts();
+                // TODO: Needs parameters to work, make connections to CRUD.
+                // _productFacade.GetAllProductsAsync();
                 break;
             case "6":
+                // TODO: Needs parameters to work, make connections to CRUD.
+                // _productFacade.GetAllProductsAsync();
+                break;
+            case "0":
+                // TODO: Needs parameters to work, make connections to CRUD.
                 Console.WriteLine("Tryck valfri knapp för att avsluta.");
                 Console.ReadKey();
                 Environment.Exit(0);

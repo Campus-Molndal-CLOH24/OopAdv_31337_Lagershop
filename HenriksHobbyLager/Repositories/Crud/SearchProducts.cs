@@ -1,32 +1,32 @@
-/* using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+// using System;
+// using System.Collections;
+// using System.Collections.Generic;
+// using System.Linq;
+//
+// namespace HenriksHobbylager.Repositories.Crud;
+//
+// internal class SearchProducts
+// {
+//     private readonly IProductFacade _productFacade;
+//     {
+//         _productFacade = productFacade;
+//     }
+//
+//     internal void ExecuteSearch()
+//     {
+//         Console.WriteLine("Skriv in söktermen (namn eller kategori): ");
+//         var searchTerm = Console.ReadLine().ToLower();
+//
+//         IEnumerable<Product> products;
+//
+//         if searchTerm != null ? products = _productFacade.SearchProduct(searchTerm) : products = _productFacade.GetAllProducts();
+//         else
+//         {
+//             Console.WriteLine("Produkten hittades inte.");
+//         }
+//     }
+// {
 
-namespace HenriksHobbylager.Repositories.Crud;
-
-internal class SearchProducts
-{
-    private readonly IProductFacade _productFacade;
-    {
-        _productFacade = productFacade;
-    }
-
-    internal void ExecuteSearch()
-    {
-        Console.WriteLine("Skriv in söktermen (namn eller kategori): ");
-        var searchTerm = Console.ReadLine().ToLower();
-
-        IEnumerable<Product> products;
-
-        if searchTerm != null ? products = _productFacade.SearchProduct(searchTerm) : products = _productFacade.GetAllProducts();
-        else
-        {
-            Console.WriteLine("Produkten hittades inte.");
-        }
-    }
-{
- */
 // TODO: Check this to add nullchecks and category.
 //    Console.WriteLine("Skriv in produkt-id: ");
 //    var productId = int.Parse(Console.ReadLine());
