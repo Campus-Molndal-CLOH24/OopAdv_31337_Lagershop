@@ -1,6 +1,7 @@
-﻿namespace HenriksHobbylager.Models;
+﻿using HenriksHobbylager.Facades;
+namespace HenriksHobbylager.Models;
 
-private void CreateProduct(Product product)
+/* private void CreateProduct(Product product)
 {
     Console.WriteLine("Skriv in produktens namn: ");
     var productName = Console.ReadLine();
@@ -32,4 +33,30 @@ private void CreateProduct(Product product)
     // Skicka produkten till repositoryn för att lägga till den i databasen
     _repository.CreateProduct(product);
     Console.WriteLine($"Produkten {product.Name} har lagts till i databasen.");
+} 
+ */
+public class AddProduct
+{
+    private readonly IProductFacade _productFacade;
+
+    public AddProduct(IProductFacade productFacade)
+    {
+        _productFacade = productFacade;
+    }
+
+    public void Execute()
+    {
+        Console.WriteLine("Skriv in produktens namn: ");
+        var productName = Console.ReadLine();
+        Console.WriteLine("Skriv in antal: ");
+        var productQuantity = int.Parse(Console.ReadLine());
+        Console.WriteLine("Skriv in priset på produkten: ");
+        var productPrice = decimal.Parse(Console.ReadLine());
+        Console.WriteLine("skriv in produkters kategori");
+        var category = Console.ReadLine();
+
+        _productFacade.AddProduct(productName, productQuantity, productPrice, category);
+
+        Console.WriteLine("Produkten har lagts till.");
+    }
 }

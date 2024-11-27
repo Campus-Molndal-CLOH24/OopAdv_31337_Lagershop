@@ -1,40 +1,29 @@
-﻿/* using System;
-using HenriksHobbyLager.Data;
+﻿using HenriksHobbylager.Data;
 using HenriksHobbylager.Models;
-// using HenriksHobbylager.UI;
-
-namespace HenriksHobbylager
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            // Console.WriteLine("Välkommen till HobbyLagret!");
-            //
-            // var menu = new Menu();
-            // Menu.ShowMenu();
-            
-            // AppDbContext context = new AppDbContext();
-            
-            var repository = new Repository();
-            repository.CreateProduct(new Product());
-        }
-    }
-} */
-
-
-
-using HenriksHobbylager.Data;
+using HenriksHobbylager.Repositories;
+using HenriksHobbylager.Facades;
+using HenriksHobbylager.UI;
+using Microsoft.Extensions.DependencyInjection;
 
 class Program
 {
     static void Main(string[] args)
     {
-        using var context = new AppDbContext();
+        // Ställ in Dependency Injection
+        var services = new ServiceCollection();
 
-        // Skapa databasen och tabeller
-        context.Database.EnsureCreated();
+        // Registrera DbContext
+        services.AddDbContext<AppDbContext>();
 
-        Console.WriteLine("Databasen och tabeller har skapats i mappen 'Data'.");
+        // Registrera Repository och Facade
+        services.AddScoped<IRepository<Product>, Repository>();
+        services.AddScoped<IProductFacade, ProductFacade>();
+
+        // Bygg ServiceProvider
+        var serviceProvider = services.BuildServiceProvider();
+
+        // Starta menyn
+        var menu = new Menu();
+        menu.ShowMenu(serviceProvider.GetService<IProductFacade>());
     }
 }

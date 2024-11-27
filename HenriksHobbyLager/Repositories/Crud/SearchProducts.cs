@@ -1,4 +1,4 @@
-using System;
+/* using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,12 +25,12 @@ internal class SearchProducts
             Console.WriteLine("Produkten hittades inte.");
         }
     }
-{
+{ */
 
-    // TODO: Check this to add nullchecks and category.
-    //    Console.WriteLine("Skriv in produkt-id: ");
-    //    var productId = int.Parse(Console.ReadLine());
-    //    var product = _productFacade.SearchProduct(productId);
+// TODO: Check this to add nullchecks and category.
+//    Console.WriteLine("Skriv in produkt-id: ");
+//    var productId = int.Parse(Console.ReadLine());
+//    var product = _productFacade.SearchProduct(productId);
 
 //    Console.WriteLine("Skriv in söktermen (namn eller id): ");
 //var searchTerm = int.Parse(Console.ReadLine());

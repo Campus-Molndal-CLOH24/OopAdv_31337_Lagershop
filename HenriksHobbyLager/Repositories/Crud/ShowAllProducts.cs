@@ -1,4 +1,4 @@
-namespace HenriksHobbylager.Repositories.Crud;
+/* namespace HenriksHobbylager.Repositories.Crud;
 
 public class ShowAllProducts
 {
@@ -11,4 +11,4 @@ public class ShowAllProducts
         Console.WriteLine($"Produktens pris: {product.Price}");
         Console.WriteLine();
     }
-}
+} */

@@ -1,4 +1,4 @@
-namespace HenriksHobbylager.Repositories.Crud;
+/* namespace HenriksHobbylager.Repositories.Crud;
 
 public class DeleteProduct
 {
@@ -17,4 +17,4 @@ public class DeleteProduct
     //     return;
     // }
     _productFacade.DeleteProduct(productId);
-}
+} */
