@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HenriksHobbyLager.Migrations
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
