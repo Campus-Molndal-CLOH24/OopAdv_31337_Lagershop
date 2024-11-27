@@ -21,6 +21,7 @@ internal class ProductFacade : IProductFacade
             Created = DateTime.Now,
             LastUpdated = DateTime.Now
         };
+
         await _productRepository.AddAsync(product);
     }
 

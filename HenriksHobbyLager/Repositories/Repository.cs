@@ -15,6 +15,12 @@ public class Repository : IRepository<Product>
         _dbSet = _context.Set<Product>();
     }
 
+    // Interface
+    public async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return await _dbSet.ToListAsync();
+    }
+
     public async Task AddAsync(Product entity)
     {
         if (!await _dbSet.AnyAsync(p => p.Name == entity.Name))
@@ -28,25 +34,20 @@ public class Repository : IRepository<Product>
         }
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync()
+
+    public async Task<IEnumerable<Product>> GetAllAsync(Func<Product, bool> predicate)
     {
         return await _dbSet.ToListAsync();
     }
 
-    public async Task<Product> GetByIdAsync(int id)
+    public async Task<Product?> GetByIdAsync(int id) // TODO: Possible null reference exception, consider returning Task<Product?>
     {
         return await _dbSet.FindAsync(id);
     }
 
-    
-    public async Task<IEnumerable<Product>> GetAllAsync(Func<Product, bool> predicate)
+    public async Task<Product?> GetByNameAsync(string name)
     {
-        return await Task.FromResult(_dbSet.Where(predicate).AsEnumerable());
-    }
-
-    public async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
+        return await _dbSet.FindAsync(name);
     }
 
     public async Task UpdateAsync(Product entity)
@@ -65,15 +66,21 @@ public class Repository : IRepository<Product>
         }
     }
 
-    public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
+    public async Task SaveChangesAsync()
     {
-        return await _dbSet.Where(predicate).ToListAsync();
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(Product entity)
     {
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync();
+    }
+
+    // TODO: Megan har tittat på koden nedan, låter den stå, men syns detta i konflikt så överväg hennes awsomesauce-kod! :)
+    public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
+    {
+        return await _dbSet.Where(predicate).ToListAsync();
     }
 
     public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)

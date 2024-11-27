@@ -11,7 +11,11 @@ class Program
 
         // TODO: Fix the menu..
         // Start the application.
-        // var menu = new Menu();
-        // menu.ShowMenu();
+
+        var productRepository = new Repository(context);
+        var productFacade = new ProductFacade(productRepository);
+
+        var menu = new Menu();
+        menu.ShowMenu(productFacade);
     }
 }

@@ -19,12 +19,12 @@ namespace HenriksHobbylager.Data
 
             // Get the relative path from appsettings.json
             var relativePath = configuration["ConnectionStrings:DatabasePath"];
+            // var projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+            var projectDirectory = Directory.GetParent(Directory.GetCurrentDirectory())!.FullName;
+
 
             // Combine with the base directory
             DbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
-
-            // Debugging message to verify the resolved path
-            Console.WriteLine($"Database path resolved to: {DbPath}");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
