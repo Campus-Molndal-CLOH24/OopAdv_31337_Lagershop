@@ -33,7 +33,7 @@ public class Repository : IRepository<Product>
         return await _dbSet.ToListAsync();
     }
 
-    public async Task<Product?> GetByIdAsync(int id)
+    public async Task<Product> GetByIdAsync(int id)
     {
         return await _dbSet.FindAsync(id);
     }

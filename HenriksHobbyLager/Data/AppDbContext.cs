@@ -1,9 +1,6 @@
-﻿
-
-using HenriksHobbylager.Models;
+﻿using HenriksHobbylager.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using System.IO;
 
 namespace HenriksHobbylager.Data
 {
@@ -12,36 +9,30 @@ namespace HenriksHobbylager.Data
         public DbSet<Product> Products { get; set; }
         public string DbPath { get; }
 
-    public AppDbContext()
+        public AppDbContext()
         {
-            // Read the connection string from appsettings and get the path to the database.
+            // Load appsettings.json from the output directory
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory) // This now works since appsettings.json is copied to bin/Debug
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
-            var projectBasePath = configuration.GetSection("ConnectionStrings:DatabasePath").Value;
+            // Get the relative path from appsettings.json
+            var relativePath = configuration["ConnectionStrings:DatabasePath"];
 
-            if (File.Exists(DbPath)) // Check if the database file exists in the project directory.
-            {
-                var dbDirectory = Path.GetDirectoryName(projectBasePath);
-                
-                if (!Directory.Exists(dbDirectory)) // Create the directory if it doesn't exist.
-                {
-                    Directory.CreateDirectory(dbDirectory);
-                }
+            // Combine with the base directory
+            DbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath);
 
-                DbPath = projectBasePath;
-                Console.WriteLine($"Databasen skapas här: {DbPath}");
-            } else
-            {
-                DbPath = projectBasePath;
-                Console.WriteLine($"Databasen hittades här: {DbPath}");
-            }
-            
+            // Debugging message to verify the resolved path
+            Console.WriteLine($"Database path resolved to: {DbPath}");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
-            => options.UseSqlite($"Data Source={DbPath}");
+        {
+            if (!options.IsConfigured)
+            {
+                options.UseSqlite($"Data Source={DbPath}");
+            }
+        }
     }
 }
