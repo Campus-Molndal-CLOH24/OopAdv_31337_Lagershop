@@ -1,4 +1,6 @@
 ﻿using HenriksHobbylager.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
 namespace HenriksHobbylager.Data;
@@ -18,3 +20,4 @@ public class MongoDbContext
     public IMongoCollection<Product> Products =>
         Database.GetCollection<Product>("Products");
 }
+

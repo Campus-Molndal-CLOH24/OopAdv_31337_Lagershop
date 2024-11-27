@@ -16,4 +16,13 @@ public class SQLiteDbContext : DbContext
     {
         options.UseSqlite($"Data Source={_dbPath}");
     }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Product>().ToTable("Products");
+        modelBuilder.Entity<Product>()
+            .HasIndex(p => p.Name)
+            .HasDatabaseName("IX_Products_Name");
+    }
 }
