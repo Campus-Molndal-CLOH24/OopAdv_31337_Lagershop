@@ -1,3 +1,5 @@
+using HenriksHobbylager.Models;
+
 namespace HenriksHobbylager.UI;
 
 using HenriksHobbyLager.Facades;
@@ -66,21 +68,38 @@ internal class Menu
 		var name = Console.ReadLine();
 
 		Console.WriteLine("Ange pris:");
-		var price = decimal.Parse(Console.ReadLine());
+		if (!decimal.TryParse(Console.ReadLine(), out var price))
+		{
+			Console.WriteLine("Ogiltigt pris. Försök igen.");
+			return;
+		}
 
 		Console.WriteLine("Ange lagerantal:");
-		var stock = int.Parse(Console.ReadLine());
-		
-		await _currentFacade.CreateProductAsync(name, stock, price);
+		if (!int.TryParse(Console.ReadLine(), out var stock))
+		{
+			Console.WriteLine("Ogiltigt lagerantal. Försök igen.");
+			return;
+		}
+
+		var product = new Product { Name = name, Price = price, Stock = stock };
+		await _currentFacade.CreateProductAsync(product.Name, product.Stock, product.Price);
 		Console.WriteLine("Produkten lades till.");
+		
 	}
 
 	private async void ShowAllProducts()
 	{
 		var products = await _currentFacade.GetAllProductsAsync();
-		foreach (var product in products)
+		if (products != null && products.Any())
 		{
-			Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price:C}, Lager: {product.Stock}");
+			foreach (var product in products)
+			{
+				Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price:C}, Lager: {product.Stock}");
+			}
+		}
+		else
+		{
+			Console.WriteLine("Inga produkter hittades.");
 		}
 	}
 }
