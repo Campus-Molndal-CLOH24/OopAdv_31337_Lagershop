@@ -6,20 +6,12 @@ namespace HenriksHobbyLager.Facades;
 
 internal class ProductFacade : IProductFacade
 {
-    private readonly IRepository<Product> _sqliteRepository;
-    private readonly IRepository<Product> _mongoRepository;
-    private readonly bool _useMongo;
+    private readonly IRepository<Product> _repository;
 
-    public ProductFacade(IRepository<Product> sqliteRepository, IRepository<Product> mongoRepository, bool useMongo)
+    public ProductFacade(IRepository<Product> repository)
     {
-        _sqliteRepository = sqliteRepository ?? throw new ArgumentNullException(nameof(sqliteRepository));
-        _mongoRepository = mongoRepository ?? throw new ArgumentNullException(nameof(mongoRepository));
-        _useMongo = useMongo;
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
-
-    private IRepository<Product> Repository => _useMongo ? _mongoRepository : _sqliteRepository;
-
-    // Sorting methods alphabetically for easier reading
 
     public async Task CreateProductAsync(string productName, int productStock, decimal productPrice)
     {
@@ -32,40 +24,25 @@ internal class ProductFacade : IProductFacade
             // LastUpdated = DateTime.Now
         };
 
-        // await _productRepository.AddAsync(product);
-        await Repository.AddAsync(product);
+        await _repository.AddAsync(product);
     }
 
     public async Task DeleteProductAsync(int productId)
     {
-        var product = await Repository.GetByIdAsync(productId);
+        var product = await _repository.GetByIdAsync(productId);
         if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
         
-        await Repository.DeleteAsync(productId);
+        await _repository.DeleteAsync(productId);
     }
 
     public async Task<IEnumerable<Product>> GetAllProductsAsync()
     {
-        return await Repository.GetAllAsync();
-
-        // The code below was added when MongoDB was introduced. Do we want to keep it? Above returns all?
-        
-        // return await _productRepository.GetAllAsync(p => true);
-        
-        //var product = await Repository.GetByIdAsync(productId);
-        //if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
-
-        //product.Name = productName;
-        //product.Stock = productQuantity;
-        //product.Price = productPrice;
-        //product.LastUpdated = DateTime.Now;
-
-        //await Repository.UpdateAsync(product);
+        return await _repository.GetAllAsync();
     }
 
     public async Task<Product> SearchProductAsync(int productId)
     {
-        var product = await Repository.GetByIdAsync(productId);
+        var product = await _repository.GetByIdAsync(productId);
         if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
         
         return product;
@@ -73,14 +50,14 @@ internal class ProductFacade : IProductFacade
 
     public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
     {
-        return await Repository.GetAllAsync(p =>
+        return await _repository.GetAllAsync(p =>
             p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
             p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task UpdateProductAsync(int productId, string productName, int productQuantity, decimal productPrice)
     {
-        var product = await Repository.GetByIdAsync(productId);
+        var product = await _repository.GetByIdAsync(productId);
         if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
 
         product.Name = productName;
@@ -88,6 +65,6 @@ internal class ProductFacade : IProductFacade
         product.Price = productPrice;
         product.LastUpdated = DateTime.Now;
 
-        await Repository.UpdateAsync(product);
+        await _repository.UpdateAsync(product);
     }
 }

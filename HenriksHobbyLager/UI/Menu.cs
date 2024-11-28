@@ -7,12 +7,14 @@ using HenriksHobbylager.Data;
 
 internal class Menu
 {
-    private IProductFacade _productFacade = null!;
-
-    internal async Task ShowMenu(IProductFacade productFacade)
+    private readonly IProductFacade _productFacade = null!;
+        public Menu(IProductFacade productFacade)
     {
-        _productFacade = productFacade;
+        _productFacade = productFacade ?? throw new ArgumentNullException(nameof(productFacade));
+    }
 
+    internal async Task ShowMenu()
+    {
         while (true)
         {
             Console.WriteLine("1. Lägg till en produkt");
@@ -20,7 +22,8 @@ internal class Menu
             Console.WriteLine("3. Uppdatera en produkt");
             Console.WriteLine("4. Sök igenom produkterna");
             Console.WriteLine("5. Visa alla produkterna");
-            // TODO: "6. Ta bort en produktkategori" ?
+            // TODO: "6-7. Ta bort en produktkategori" ?
+            Console.WriteLine("6. Gå tillbaka till databasmenyn");
             Console.WriteLine("0. Avsluta");
             Console.WriteLine("Välj ett alternativ: ");
 
@@ -42,9 +45,9 @@ internal class Menu
                 case "5":
                     await MenuChoiceFive();
                     break;
-                //case "6":
-                //    await MenuChoiceSix();
-                //    break;
+                case "6":
+                    await MenuChoiceSix();
+                    break;
                 case "0":
                     Console.WriteLine("Tryck valfri knapp för att avsluta.");
                     Console.ReadKey();
@@ -61,10 +64,7 @@ internal class Menu
     {
         try
         {
-            using var context = new AppDbContext();
-            var repository = new SQLiteRepository(context);
-            var createUnit = new CreateProduct(repository);
-            await createUnit.CreateProductAsync();
+            await _productFacade.CreateProductAsync("Produktnamn", 10, 199.99m);
         }
         catch (Exception exInput)
         {
@@ -76,10 +76,7 @@ internal class Menu
     {
         try
         {
-            using var context = new AppDbContext();
-            var repository = new SQLiteRepository(context);
-            var deleteUnit = new DeleteProduct(repository);
-            await deleteUnit.DeleteProductAsync();
+            await _productFacade.DeleteProductAsync(1);
         }
         catch (Exception exInput)
         {
@@ -105,14 +102,12 @@ internal class Menu
     {
         try
         {
-            using var context = new AppDbContext();
-            var repository = new SQLiteRepository(context);
-            var searchUnit = new SearchProducts(repository);
-            await searchUnit.ExecuteSearchAsync();
+            var showAllProducts = new ShowAllProducts(_productFacade);
+            await showAllProducts.DisplayAllProductsAsync();
         }
-        catch (Exception exInput)
+        catch (Exception exFetchAll)
         {
-            Console.WriteLine($"Ett fel inträffade: {exInput.Message}");
+            Console.WriteLine($"Ett fel inträffade: {exFetchAll.Message}");
         }
     }
 
@@ -120,11 +115,7 @@ internal class Menu
     {
         try
         {
-            using var context = new AppDbContext();
-            var repository = new SQLiteRepository(context);
-            var products = await repository.GetAllAsync();
-
-            Console.WriteLine("Alla produkter:");
+            var products = await _productFacade.GetAllProductsAsync();
             foreach (var product in products)
             {
                 Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price:C}, Lager: {product.Stock}");
@@ -134,5 +125,11 @@ internal class Menu
         {
             Console.WriteLine($"Ett fel inträffade: {exInput.Message}");
         }
+    }
+
+    private async Task MenuChoiceSix()
+    {
+        // TODO; Vi satte ShowMenu i meny så länge, den skall senare anropa databasmenyn när vi har brutit ut den
+        await ShowMenu();
     }
 }
