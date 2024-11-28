@@ -7,6 +7,7 @@ using HenriksHobbyLager.Repositories;
 using HenriksHobbylager.UI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using System;
 
 
 namespace HenriksHobbylager
@@ -15,7 +16,31 @@ namespace HenriksHobbylager
     {
         static async Task Main(string[] args)
         {
-            await MainProgramMenuAsync();
+            // Build configuration
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            // Setup DI container
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(configuration);
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            // Resolve Menu and its dependencies
+            var menu = new Menu();
+            var productFacade = serviceProvider.GetService<IProductFacade>();
+            if (productFacade != null)
+            {
+                await menu.ShowMenu(productFacade);
+            }
+            else
+            {
+                Console.WriteLine("Failed to initialize the application. ProductFacade is missing.");
+            }
+
+            //await MainProgramMenuAsync();
         }
 
         static async Task MainProgramMenuAsync()
