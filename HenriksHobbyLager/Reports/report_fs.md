@@ -14,15 +14,21 @@ Svara på frågorna nedan och lämna in det som en del av din inlämning.
 ## Vilka patterns använde ni och varför?
 
 ## Vilka tekniska utmaningar stötte ni på och hur löste ni dem?
+- MongoDB skapar en hel massa filer, så valde att se MongoDB som en fristående VPS som kör Docker Composer och inte 
+  som en del av projektet. Så la in mongodb/ i .gitignore.
 
 ## Hur planerade du ditt arbete?
 
 ## Vilka dela gjorde du?
+- Projektledning. 
 - Satte upp projektet i GitHub och skapade en .gitignore fil.
 - Skapade en Kanban/Scrum board i GitHub och underhöll den.
 - Styrde gruppen i rätt riktning och försökte strukturera upp en plan med standups varje dag.
 - Arbetade ihop med Andreas och skapade en databas och en DbContext.
 - Refactoriserade om AppDbContext så den inte skapade databasen i /bin/debug/ utan i /Data/Database och också hämtade strängen från appsettings.json för ökad säkerhet.
+- Satte upp MongoDB via Docker Composer och skapade en DbContext för att kunna använda MongoDB.
+  CRUD kopplingarna ska fungera, även om det inte finns någon förinmatad data i DBn.
+- Skapade en logo med hjälpa av ChatGTP, och la in den i README.md så den syns i GitHub.
 
 ## Vilka utmaningar stötte du på och hur löste du dem?
 
