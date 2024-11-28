@@ -1,4 +1,7 @@
 # Henriks Hobbylager
+
+![Project Logo](./HenriksHobbyLager/docs/images/hhl_logo.jpg)
+
   
 ### Kort beskrivning av projektet - TODO; Utveckla detta!
     
@@ -15,7 +18,7 @@ git clone https://github.com/Campus-Molndal-CLOH24/OopAdv_31337_Lagershop.git
 ### Docker Composer
   - Kräver att docker composer och docker är installerat.
   - Starta MongoDB inne från projektet där docker-compose.yml ligger genom Docker Desktop terminalen, skärmbild 
-    ligger i mappen "docker".
+    ligger i mappen "docs/docker".
     ```bash
     docker-compose up -d   
     ```
