@@ -1,4 +1,4 @@
-using HenriksHobbylager.Facades;
+/* using HenriksHobbylager.Facades;
 using HenriksHobbyLager.Facades;
 
 namespace HenriksHobbylager.Repositories.Crud;
@@ -28,4 +28,4 @@ public class ShowAllProducts
             Console.WriteLine("No products found.");
         }
     }
- }
+ } */

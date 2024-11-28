@@ -1,5 +1,5 @@
 ﻿using HenriksHobbylager.Data;
-using HenriksHobbylager.Facades;
+
 using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Repositories;
 using HenriksHobbylager.Models;
@@ -8,20 +8,30 @@ using HenriksHobbylager.UI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
-using HenriksHobbyLager.Data;
+using HenriksHobbylager.Interface;
+
 
 
 namespace HenriksHobbylager
 {
     internal class Program
     {
+
+
+
+
+        // Val 1 för SQLite
+
         static async Task Main(string[] args)
         {
-            await MainProgramMenuAsync();
-        }
 
-        static async Task MainProgramMenuAsync()
+
+
+        }
+        static async Task MainProgramMenuAsync(IProductFacade sqliteFacade, IProductFacade mongoFacade)
         {
+            var _sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade));
+            var _mongoFacade = mongoFacade ?? throw new ArgumentNullException(nameof(mongoFacade));
             while (true)
             {
                 Console.WriteLine("Välj databasalternativ:");
@@ -35,10 +45,12 @@ namespace HenriksHobbylager
                 switch (menuOption)
                 {
                     case "1":
-                        await SQLMenuAsync();
+                        var menuSQLite = new Menu(_sqliteFacade);
+                        await menuSQLite.ShowMenu();
                         break;
                     case "2":
-                        await MongoMenuAsync();
+                        var menuMongo = new Menu(_mongoFacade);
+                        await menuMongo.ShowMenu();
                         break;
                     case "0":
                         Console.WriteLine("Tryck valfri knapp för att avsluta.");
@@ -51,63 +63,6 @@ namespace HenriksHobbylager
                 }
             }
         }
-
-        static async Task SQLMenuAsync()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var services = new ServiceCollection();
-
-            // Registrera SQLite
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(configuration["ConnectionStrings:DatabasePath"]));
-            services.AddScoped<IRepository<Product>, SQLiteRepository>();
-            services.AddScoped<IProductFacade, ProductFacade>();
-            services.AddScoped<Menu>();
-
-            var serviceProvider = services.BuildServiceProvider();
-
-            // Kör menyn
-            var menu = serviceProvider.GetService<Menu>();
-            if (menu != null)
-            {
-                await menu.ShowMenu();
-            }
-            else
-            {
-                Console.WriteLine("Fel: Kunde inte ladda menyn.");
-            }
-        }
-
-        static async Task MongoMenuAsync()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var services = new ServiceCollection();
-
-            // Registrera MongoDB
-            services.AddScoped<IRepository<Product>, MongoRepository>();
-            services.AddScoped<IProductFacade, ProductFacade>();
-            services.AddScoped<Menu>();
-
-            var serviceProvider = services.BuildServiceProvider();
-
-            // Kör menyn
-            var menu = serviceProvider.GetService<Menu>();
-            if (menu != null)
-            {
-                await menu.ShowMenu();
-            }
-            else
-            {
-                Console.WriteLine("Fel: Kunde inte ladda menyn.");
-            }
-        }
     }
 }
+
