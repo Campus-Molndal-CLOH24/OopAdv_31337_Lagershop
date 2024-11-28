@@ -10,16 +10,17 @@ using HenriksHobbylager.Interface;
 
 internal class Menu
 {
-	private readonly IProductFacade _productFacade = null!;
-	public Menu(IProductFacade productFacade)
-	{
-		_productFacade = productFacade ?? throw new ArgumentNullException(nameof(productFacade));
-	}
+	private readonly IProductFacade _currentFacade;
 
+	public Menu(IProductFacade currentFacade)
+	{
+		_currentFacade = currentFacade ?? throw new ArgumentNullException(nameof(currentFacade));	}
+	
 	internal async Task ShowMenu()
 	{
 		while (true)
 		{
+			Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
 			Console.WriteLine("1. Lägg till en produkt");
 			Console.WriteLine("2. Ta bort en produkt");
 			Console.WriteLine("3. Uppdatera en produkt");
@@ -37,19 +38,15 @@ internal class Menu
 					AddProduct();
 					break;
 				case "2":
-					ShowAllProducts();
 					break;
 				case "3":
-					// await MenuChoiceThree();
 					break;
 				case "4":
-					/* MenuChoiceFour(); */
 					break;
 				case "5":
-					/* MenuChoiceFive(); */
+					ShowAllProducts();
 					break;
 				case "6":
-					/* 	MenuChoiceSix(); */
 					break;
 				case "0":
 					Console.WriteLine("Tryck valfri knapp för att avsluta.");
@@ -63,24 +60,27 @@ internal class Menu
 		}
 	}
 
-	private void AddProduct()
+	private async void AddProduct()
 	{
-		Console.WriteLine("ange productnamn");
+		Console.WriteLine("Ange productnamn:");
 		var name = Console.ReadLine();
 
-		Console.Write("Ange pris");
-		var price = double.Parse(Console.ReadLine());
+		Console.WriteLine("Ange pris:");
+		var price = decimal.Parse(Console.ReadLine());
 
-		Console.Write("Ange lagerantal");
+		Console.WriteLine("Ange lagerantal:");
 		var stock = int.Parse(Console.ReadLine());
+		
+		await _currentFacade.CreateProductAsync(name, stock, price);
+		Console.WriteLine("Produkten lades till.");
 	}
 
 	private async void ShowAllProducts()
 	{
-		var products = await _productFacade.GetAllProductsAsync();
+		var products = await _currentFacade.GetAllProductsAsync();
 		foreach (var product in products)
 		{
-			Console.WriteLine($"{product.Id}, Name: {product.Name}");
+			Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price:C}, Lager: {product.Stock}");
 		}
 	}
 }

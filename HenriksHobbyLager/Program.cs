@@ -1,8 +1,6 @@
 ﻿using HenriksHobbylager.Data;
-
 using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Repositories;
-using HenriksHobbylager.Models;
 using HenriksHobbyLager.Repositories;
 using HenriksHobbylager.UI;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,28 +8,36 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using HenriksHobbylager.Interface;
 
-
-
 namespace HenriksHobbylager
 {
     internal class Program
     {
 
-
-
-
-        // Val 1 för SQLite
-
         static async Task Main(string[] args)
         {
+            var sqliteFacade = CreateSqLiteFacade();
+            var mongoFacade = CreateMongoFacade();
 
-
-
+            await MainProgramMenuAsync(sqliteFacade, mongoFacade);
         }
+        
+        private static IProductFacade CreateSqLiteFacade()
+        {
+            var dbPath = "app.db"; // Hårdkodat för enkelhet
+            var sqliteRepository = new SQLiteRepository(new SQLiteDbContext(dbPath));
+            return new ProductFacade(sqliteRepository);
+        }
+
+        private static IProductFacade CreateMongoFacade()
+        {
+            var mongoConnectionString = "mongodb://localhost:27017";
+            var mongoDatabaseName = "HenriksHobbylager";
+            var mongoRepository = new MongoRepository(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
+            return new ProductFacade(mongoRepository);
+        }
+        
         static async Task MainProgramMenuAsync(IProductFacade sqliteFacade, IProductFacade mongoFacade)
         {
-            var _sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade));
-            var _mongoFacade = mongoFacade ?? throw new ArgumentNullException(nameof(mongoFacade));
             while (true)
             {
                 Console.WriteLine("Välj databasalternativ:");
@@ -45,11 +51,11 @@ namespace HenriksHobbylager
                 switch (menuOption)
                 {
                     case "1":
-                        var menuSQLite = new Menu(_sqliteFacade);
+                        var menuSQLite = new Menu(sqliteFacade);
                         await menuSQLite.ShowMenu();
                         break;
                     case "2":
-                        var menuMongo = new Menu(_mongoFacade);
+                        var menuMongo = new Menu(mongoFacade);
                         await menuMongo.ShowMenu();
                         break;
                     case "0":

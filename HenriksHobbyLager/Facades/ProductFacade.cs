@@ -7,10 +7,12 @@ namespace HenriksHobbyLager.Facades;
 internal class ProductFacade : IProductFacade
 {
 	private readonly IRepository<Product> _repository;
+	public string DatabaseType { get; } 
 
 	public ProductFacade(IRepository<Product> repository)
 	{
 		_repository = repository ?? throw new ArgumentNullException(nameof(repository));
+		DatabaseType = repository.GetType().Name.Contains("SQLite") ? "SQLite" : "MongoDB";
 	}
 
 	public async Task CreateProductAsync(string productName, int productStock, decimal productPrice)
@@ -20,7 +22,7 @@ internal class ProductFacade : IProductFacade
 			Name = productName,
 			Stock = productStock,
 			Price = productPrice,
-			Created = DateTime.Now,
+			// Created = DateTime.Now,
 			// LastUpdated = DateTime.Now
 		};
 
