@@ -8,15 +8,15 @@ internal class ProductFacade : IProductFacade
 {
     private readonly IRepository<Product> _sqliteRepository;
     private readonly IRepository<Product> _mongoRepository;
-
     private readonly bool _useMongo;
 
     public ProductFacade(IRepository<Product> sqliteRepository, IRepository<Product> mongoRepository, bool useMongo)
     {
-        _sqliteRepository = sqliteRepository;
-        _mongoRepository = mongoRepository;
+        _sqliteRepository = sqliteRepository ?? throw new ArgumentNullException(nameof(sqliteRepository));
+        _mongoRepository = mongoRepository ?? throw new ArgumentNullException(nameof(mongoRepository));
         _useMongo = useMongo;
     }
+
     private IRepository<Product> Repository => _useMongo ? _mongoRepository : _sqliteRepository;
 
     // Sorting methods alphabetically for easier reading
@@ -29,25 +29,29 @@ internal class ProductFacade : IProductFacade
             Stock = productStock,
             Price = productPrice,
             Created = DateTime.Now,
-            LastUpdated = DateTime.Now
+            // LastUpdated = DateTime.Now
         };
 
-        await _productRepository.AddAsync(product);
-        // await Repository.AddAsync(product);
+        // await _productRepository.AddAsync(product);
+        await Repository.AddAsync(product);
     }
 
     public async Task DeleteProductAsync(int productId)
     {
         var product = await Repository.GetByIdAsync(productId);
         if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
+        
         await Repository.DeleteAsync(productId);
     }
 
     public async Task<IEnumerable<Product>> GetAllProductsAsync()
     {
-        return await _productRepository.GetAllAsync(p => true);
+        return await Repository.GetAllAsync();
 
         // The code below was added when MongoDB was introduced. Do we want to keep it? Above returns all?
+        
+        // return await _productRepository.GetAllAsync(p => true);
+        
         //var product = await Repository.GetByIdAsync(productId);
         //if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
 
@@ -63,6 +67,7 @@ internal class ProductFacade : IProductFacade
     {
         var product = await Repository.GetByIdAsync(productId);
         if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
+        
         return product;
     }
 
@@ -75,17 +80,14 @@ internal class ProductFacade : IProductFacade
 
     public async Task UpdateProductAsync(int productId, string productName, int productQuantity, decimal productPrice)
     {
-        // The code below was added when MongoDB was introduced. Do we want to keep it? Above returns all?
-        //var product = await _productRepository.GetByIdAsync(productId);
-        //if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
+        var product = await Repository.GetByIdAsync(productId);
+        if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
 
-        //product.Name = productName;
-        //product.Stock = productQuantity;
-        //product.Price = productPrice;
-        //product.LastUpdated = DateTime.Now;
+        product.Name = productName;
+        product.Stock = productQuantity;
+        product.Price = productPrice;
+        product.LastUpdated = DateTime.Now;
 
-        //await _productRepository.UpdateAsync(product);
-
-        return await Repository.GetAllAsync(p => true);
+        await Repository.UpdateAsync(product);
     }
 }

@@ -4,7 +4,8 @@ using Microsoft.EntityFrameworkCore;
 namespace HenriksHobbylager.Data;
 public class SQLiteDbContext : DbContext
 {
-    public DbSet<Product> Products { get; set; }
+    public DbSet<Product> Products { get; set; } = null!;
+
     private readonly string _dbPath;
 
     public SQLiteDbContext(string dbPath)
@@ -16,13 +17,15 @@ public class SQLiteDbContext : DbContext
     {
         options.UseSqlite($"Data Source={_dbPath}");
     }
-    
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Product>().ToTable("Products");
-        modelBuilder.Entity<Product>()
-            .HasIndex(p => p.Name)
-            .HasDatabaseName("IX_Products_Name");
-    }
 }
+
+// Saving the below for reference. This is how you can configure the database to use a specific table name and index name.
+
+//protected override void OnModelCreating(ModelBuilder modelBuilder)
+//{
+//    base.OnModelCreating(modelBuilder);
+//    modelBuilder.Entity<Product>().ToTable("Products");
+//    modelBuilder.Entity<Product>()
+//        .HasIndex(p => p.Name)
+//        .HasDatabaseName("IX_Products_Name");
+//}

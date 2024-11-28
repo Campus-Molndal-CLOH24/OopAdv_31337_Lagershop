@@ -8,10 +8,11 @@ namespace HenriksHobbyLager.Repositories;
 
 public class SQLiteRepository : IRepository<Product>
 {
-    private readonly SQLiteDbContext _context;
+    private readonly DbContext _context; // Use base DbContext for flexibility
+    // private readonly SQLiteDbContext _context;
     private readonly DbSet<Product> _dbSet;
 
-    public SQLiteRepository(SQLiteDbContext context)
+    public SQLiteRepository(DbContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _dbSet = _context.Set<Product>();
@@ -21,16 +22,8 @@ public class SQLiteRepository : IRepository<Product>
 
     public async Task AddAsync(Product entity)
     {
-        //if (!await _dbSet.AnyAsync(p => p.Name == entity.Name))
-        //{
             await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
-        //}
-        // TODO; Is the above really needed? Can't we just add the product and let the database handle it?
-        //else
-        //{
-        //    Console.WriteLine("Produkten finns redan i databasen.");
-        //}
     }
 
     public async Task DeleteAsync(int id)
@@ -54,17 +47,12 @@ public class SQLiteRepository : IRepository<Product>
         return await _dbSet.ToListAsync();
     }
 
-    //public async Task<IEnumerable<Product>> GetAllAsync(Func<Product, bool> predicate)
-    //{
-    //    return await Task.FromResult(_dbSet.AsEnumerable().Where(predicate));
-    //}
-
     public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
     {
         return await _dbSet.Where(predicate).ToListAsync();
     }
 
-    public async Task<Product?> GetByIdAsync(int id) // TODO: Possible null reference exception, consider returning Task<Product?>
+    public async Task<Product?> GetByIdAsync(int id)
     {
         return await _dbSet.FindAsync(id);
     }

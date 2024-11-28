@@ -57,10 +57,17 @@ namespace HenriksHobbylager
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            // Ensure that the database directory exists
+            // Ensure that the database directory is valid
             var dbPath = configuration["ConnectionStrings:DatabasePath"];
+            if (string.IsNullOrWhiteSpace(dbPath))
+            {
+                Console.WriteLine("Fel: Databasens sökväg saknas i konfigurationen.");
+                return;
+            }
+
+            // Ensure that the database directory exists
             var dbDirectory = Path.GetDirectoryName(dbPath);
-            if (!Directory.Exists(dbDirectory))
+            if (dbDirectory is not null && !Directory.Exists(dbDirectory))
             {
                 Directory.CreateDirectory(dbDirectory);
             }
@@ -70,7 +77,7 @@ namespace HenriksHobbylager
             // Setup Dependency Injection for SQLite
             var services = new ServiceCollection();
             services.AddSingleton(_ => new AppDbContext());
-            services.AddScoped<IRepository<Product>, Repository>(); // TODO: Change to SQLiteRepository!
+            services.AddScoped<IRepository<Product>, SQLiteRepository>();
             services.AddScoped<IProductFacade, ProductFacade>();
             services.AddScoped<Menu>();
 
@@ -85,6 +92,14 @@ namespace HenriksHobbylager
                 {
                     await menu.ShowMenu(productFacade);
                 }
+                else
+                {
+                    Console.WriteLine("Fel: Kunde inte ladda produktfasaden.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Fel: Kunde inte ladda menyn.");
             }
         }
 
@@ -96,8 +111,16 @@ namespace HenriksHobbylager
                 .AddJsonFile("appsettings.json")
                 .Build();
 
+            // Ensure MongoDB connection string and database name are valid
             var mongoConnectionString = configuration["ConnectionStrings:MongoDbConnection"];
             var mongoDatabaseName = configuration["ConnectionStrings:MongoDbName"];
+
+            if (string.IsNullOrWhiteSpace(mongoConnectionString) || string.IsNullOrWhiteSpace(mongoDatabaseName))
+            {
+                Console.WriteLine("Fel: MongoDB-anslutningssträng eller databasnamn saknas i konfigurationen.");
+                return;
+            }
+
             Console.WriteLine($"Använder MongoDB-databas: {mongoDatabaseName}");
 
             // Setup Dependency Injection for MongoDB
@@ -118,6 +141,14 @@ namespace HenriksHobbylager
                 {
                     await menu.ShowMenu(productFacade);
                 }
+                else
+                {
+                    Console.WriteLine("Fel: Kunde inte ladda produktfasaden.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Fel: Kunde inte ladda menyn.");
             }
         }
     }
