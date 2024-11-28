@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using HenriksHobbylager.Interface;
+using Microsoft.Extensions.Configuration;
 
 namespace HenriksHobbylager
 {
@@ -23,15 +24,25 @@ namespace HenriksHobbylager
         
         private static IProductFacade CreateSqLiteFacade()
         {
-            var dbPath = "app.db"; // Hårdkodat för enkelhet
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var dbPath = configuration.GetConnectionString("DatabasePath");
             var sqliteRepository = new SQLiteRepository(new SQLiteDbContext(dbPath));
             return new ProductFacade(sqliteRepository);
         }
 
         private static IProductFacade CreateMongoFacade()
         {
-            var mongoConnectionString = "mongodb://localhost:27017";
-            var mongoDatabaseName = "HenriksHobbylager";
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            var mongoConnectionString = configuration.GetConnectionString("MongoDbConnection");
+            var mongoDatabaseName = configuration["ConnectionStrings:MongoDbName"];
             var mongoRepository = new MongoRepository(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
             return new ProductFacade(mongoRepository);
         }
