@@ -131,46 +131,112 @@ internal class MenuCrud
 		Console.ResetColor();
 	}
 
-	private async Task UpdateProduct()
-	{
-		Console.Write("Ange ID för produkten som ska uppdateras: ");
-		if (!int.TryParse(Console.ReadLine(), out var id))
-		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Ogiltigt ID. Försök igen.");
-			Console.ResetColor();
-			return;
-		}
+    private async Task UpdateProduct()
+    {
+        Console.WriteLine("Vill du söka efter produkt med:");
+        Console.WriteLine("1. Produkt-ID");
+        Console.WriteLine("2. Produktnamn");
+        Console.Write("Välj alternativ: ");
 
-		Console.Write("Ange nytt namn: ");
-		var name = Console.ReadLine();
+        var searchOption = Console.ReadLine();
 
-		Console.Write("Ange nytt pris: ");
-		if (!decimal.TryParse(Console.ReadLine(), out var price))
-		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Ogiltigt pris. Försök igen.");
-			Console.ResetColor();
-			return;
-		}
+        Product product = null;
 
-		Console.Write("Ange nytt lagerantal: ");
-		if (!int.TryParse(Console.ReadLine(), out var stock))
-		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Ogiltigt antal. Försök igen.");
-			Console.ResetColor();
-			return;
-		}
+        if (searchOption == "1")
+        {
+            Console.Write("Ange ID för produkten som ska uppdateras: ");
+            if (!int.TryParse(Console.ReadLine(), out var id))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Ogiltigt ID. Försök igen.");
+                Console.ResetColor();
+                return;
+            }
 
-		var product = new Product { Id = id, Name = name, Price = (int)price, Stock = stock };
-		await _currentFacade.UpdateProductAsync(product);
-		Console.ForegroundColor = ConsoleColor.Green;
-		Console.WriteLine("Produkten har uppdaterats.");
-		Console.ResetColor();
-	}
+            product = await _currentFacade.GetProductByIdAsync(id);
+        }
+        else if (searchOption == "2")
+        {
+            Console.Write("Ange produktens namn: ");
+            var name = Console.ReadLine();
 
-	private async Task DeleteProduct()
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Produktnamnet får inte vara tomt. Försök igen.");
+                Console.ResetColor();
+                return;
+            }
+
+            var products = await _currentFacade.SearchProductsAsync(name);
+            if (!products.Any())
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Ingen produkt hittades med det angivna namnet.");
+                Console.ResetColor();
+                return;
+            }
+
+            if (products.Count() > 1)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Flera produkter hittades:");
+                foreach (var p in products)
+                {
+                    Console.WriteLine($"ID: {p.Id}, Namn: {p.Name}, Pris: {p.Price}, Lager: {p.Stock}");
+                }
+                Console.ResetColor();
+
+                Console.Write("Ange ID för produkten du vill uppdatera: ");
+                if (!int.TryParse(Console.ReadLine(), out var id))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Ogiltigt ID. Försök igen.");
+                    Console.ResetColor();
+                    return;
+                }
+
+                product = await _currentFacade.GetProductByIdAsync(id);
+            }
+            else
+            {
+                product = products.First();
+            }
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Ogiltigt alternativ. Försök igen.");
+            Console.ResetColor();
+            return;
+        }
+
+        if (product == null)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Produkten kunde inte hittas.");
+            Console.ResetColor();
+            return;
+        }
+
+        Console.WriteLine($"Uppdaterar produkt: ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price}, Lager: {product.Stock}");
+        Console.Write("Ange nytt namn (eller tryck Enter för att behålla): ");
+        var newName = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(newName)) product.Name = newName;
+
+        Console.Write("Ange nytt pris (eller tryck Enter för att behålla): ");
+        if (decimal.TryParse(Console.ReadLine(), out var newPrice)) product.Price = newPrice;
+
+        Console.Write("Ange nytt lagerantal (eller tryck Enter för att behålla): ");
+        if (int.TryParse(Console.ReadLine(), out var newStock)) product.Stock = newStock;
+
+        await _currentFacade.UpdateProductAsync(product);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("Produkten har uppdaterats.");
+        Console.ResetColor();
+    }
+
+    private async Task DeleteProduct()
 	{
 		Console.Write("Ange ID för produkten som ska tas bort: ");
 		if (!int.TryParse(Console.ReadLine(), out var id))
@@ -187,76 +253,58 @@ internal class MenuCrud
 		Console.ResetColor();
 	}
 
-	private async Task SearchProducts()
-	{
-		Console.Write("Ange sökterm: ");
-		var searchTerm = Console.ReadLine();
+    private async Task SearchProducts(bool forUpdate = false)
+    {
+        Console.Write("Ange sökterm: ");
+        var searchTerm = Console.ReadLine();
 
-		if (string.IsNullOrWhiteSpace(searchTerm))
-		{
-			throw new ArgumentException("Search term cannot be null or empty.", nameof(searchTerm));
-		}
-		
-		try
-		{
-			// Använd _currentFacade för att söka i den aktiva databasen
-			var products = await _currentFacade.SearchProductsAsync(searchTerm);
+        var products = await _currentFacade.SearchProductsAsync(searchTerm);
 
-			if (products.Any())
-			{
-				Console.ForegroundColor = ConsoleColor.Cyan;
-				Console.WriteLine("=========================================");
-				Console.WriteLine("            SÖKRESULTAT                 ");
-				Console.WriteLine("=========================================");
-				Console.ResetColor();
+        if (!products.Any())
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Inga produkter hittades.");
+            Console.ResetColor();
+            return;
+        }
 
-				Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
-				Console.WriteLine(new string('-', 50));
+        Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
+        Console.WriteLine(new string('-', 50));
 
-				foreach (var product in products)
-				{
-					Console.WriteLine("{0, -5} | {1, -20} | {2, -10:C} | {3, -10}",
-						product.Id,
-						product.Name,
-						product.Price,
-						product.Stock);
-				}
+        foreach (var product in products)
+        {
+            Console.WriteLine("{0, -5} | {1, -20} | {2, -10:C} | {3, -10}",
+                              product.Id, product.Name, product.Price, product.Stock);
+        }
 
-				Console.ForegroundColor = ConsoleColor.Cyan;
-				Console.WriteLine("=========================================");
-				Console.ResetColor();
-			}
-			else
-			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("Inga produkter hittades.");
-				Console.ResetColor();
-			}
-		}
-		catch (Exception ex)
-		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine($"Ett fel inträffade: {ex.Message}");
-			Console.ResetColor();
-		}
-		
-		
-		// if (products.Any())
-		// {
-		// 	foreach (var product in products)
-		// 	{
-		// 		Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price:C}, Lager: {product.Stock}");
-		// 	}
-		// }
-		// else
-		// {
-		// 	Console.ForegroundColor = ConsoleColor.Red;
-		// 	Console.WriteLine("Inga produkter hittades.");
-		// 	Console.ResetColor();
-		// }
-	}
+        if (forUpdate)
+        {
+            Console.Write("Ange ID för produkten du vill uppdatera: ");
+            if (int.TryParse(Console.ReadLine(), out var id))
+            {
+                var product = products.FirstOrDefault(p => p.Id == id);
+                if (product != null)
+                {
+                    await UpdateProduct(); // Anropa uppdateringsflödet
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Produkten kunde inte hittas.");
+                    Console.ResetColor();
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Ogiltigt ID. Försök igen.");
+                Console.ResetColor();
+            }
+        }
+    }
 
-	private async Task ShowAllProducts()
+
+    private async Task ShowAllProducts()
 	{
 		var products = await _currentFacade.GetAllProductsAsync();
 
