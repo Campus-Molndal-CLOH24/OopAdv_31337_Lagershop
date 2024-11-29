@@ -1,113 +1,53 @@
 ﻿using HenriksHobbylager.Data;
-using HenriksHobbylager.Facades;
 using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Repositories;
-using HenriksHobbylager.Models;
-using HenriksHobbyLager.Repositories;
-using HenriksHobbylager.UI;
-using Microsoft.Extensions.DependencyInjection;
+using HenriksHobbylager.Interface;
 using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using HenriksHobbyLager.Data;
+using HenriksHobbyLager.Repositories;
 
-
-namespace HenriksHobbylager
+namespace HenriksHobbylager;
+internal class Program
 {
-    internal class Program
+    static async Task Main(string[] args)
     {
-        static async Task Main(string[] args)
+        var sqliteFacade = CreateSqLiteFacade();
+        if (sqliteFacade == null)
         {
-            await MainProgramMenuAsync();
+            throw new ArgumentNullException(nameof(sqliteFacade), "SQLite Facade creation failed.");
+        }
+        
+        var mongoFacade = CreateMongoFacade();
+        if (mongoFacade == null)
+        {
+            throw new ArgumentNullException(nameof(mongoFacade), "Mongo Facade creation failed.");
         }
 
-        static async Task MainProgramMenuAsync()
-        {
-            while (true)
-            {
-                Console.WriteLine("Välj databasalternativ:");
-                Console.WriteLine("1. SQLite");
-                Console.WriteLine("2. MongoDB");
-                Console.WriteLine("0. Avsluta");
-                Console.WriteLine("Välj ett alternativ: ");
+        var mainMenu = new MenuDb(sqliteFacade, mongoFacade);
+        await mainMenu.ShowMainMenuAsync();
+    }
 
-                var menuOption = Console.ReadLine();
+    private static IProductFacade CreateSqLiteFacade()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
 
-                switch (menuOption)
-                {
-                    case "1":
-                        await SQLMenuAsync();
-                        break;
-                    case "2":
-                        await MongoMenuAsync();
-                        break;
-                    case "0":
-                        Console.WriteLine("Tryck valfri knapp för att avsluta.");
-                        Console.ReadKey();
-                        Environment.Exit(0);
-                        break;
-                    default:
-                        Console.WriteLine("Felaktigt val. Välj mellan alternativ 1-2, eller 0 för att avsluta.");
-                        break;
-                }
-            }
-        }
+        var dbPath = configuration.GetConnectionString("DatabasePath");
+        var sqliteRepository = new SQLiteRepository(new SQLiteDbContext(dbPath));
+        return new ProductFacade(sqliteRepository);
+    }
 
-        static async Task SQLMenuAsync()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
+    private static IProductFacade CreateMongoFacade()
+    {
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json")
+            .Build();
 
-            var services = new ServiceCollection();
-
-            // Registrera SQLite
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlite(configuration["ConnectionStrings:DatabasePath"]));
-            services.AddScoped<IRepository<Product>, SQLiteRepository>();
-            services.AddScoped<IProductFacade, ProductFacade>();
-            services.AddScoped<Menu>();
-
-            var serviceProvider = services.BuildServiceProvider();
-
-            // Kör menyn
-            var menu = serviceProvider.GetService<Menu>();
-            if (menu != null)
-            {
-                await menu.ShowMenu();
-            }
-            else
-            {
-                Console.WriteLine("Fel: Kunde inte ladda menyn.");
-            }
-        }
-
-        static async Task MongoMenuAsync()
-        {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var services = new ServiceCollection();
-
-            // Registrera MongoDB
-            services.AddScoped<IRepository<Product>, MongoRepository>();
-            services.AddScoped<IProductFacade, ProductFacade>();
-            services.AddScoped<Menu>();
-
-            var serviceProvider = services.BuildServiceProvider();
-
-            // Kör menyn
-            var menu = serviceProvider.GetService<Menu>();
-            if (menu != null)
-            {
-                await menu.ShowMenu();
-            }
-            else
-            {
-                Console.WriteLine("Fel: Kunde inte ladda menyn.");
-            }
-        }
+        var mongoConnectionString = configuration.GetConnectionString("MongoDbConnection");
+        var mongoDatabaseName = configuration["ConnectionStrings:MongoDbName"];
+        var mongoRepository = new MongoRepository(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
+        return new ProductFacade(mongoRepository);
     }
 }

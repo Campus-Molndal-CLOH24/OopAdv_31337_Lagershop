@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HenriksHobbyLager.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(MongoDbContext))]
     [Migration("20241127085543_AddProductIndexes")]
     partial class AddProductIndexes
     {
