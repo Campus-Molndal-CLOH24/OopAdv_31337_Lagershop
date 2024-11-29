@@ -2,15 +2,17 @@ using HenriksHobbylager.Models;
 using HenriksHobbylager.Interface;
 
 namespace HenriksHobbylager.UI;
-internal class Menu
+internal class MenuCrud
 {
 	private readonly IProductFacade _currentFacade;
 	private IProductFacade sqliteFacade;
 	private IProductFacade mongoFacade;
 
-	public Menu(IProductFacade currentFacade)
+	public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade = null, IProductFacade mongoFacade = null)
 	{
 		_currentFacade = currentFacade ?? throw new ArgumentNullException(nameof(currentFacade));
+		this.sqliteFacade = sqliteFacade ?? currentFacade;
+		this.mongoFacade = mongoFacade ?? currentFacade;
 	}
 
 	internal async Task ShowMenu()
@@ -21,7 +23,7 @@ internal class Menu
 		{
 			Console.Clear();
 			DisplayMenuHeader();
-
+			Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
 			Console.WriteLine("1. Lägg till en produkt");
 			Console.WriteLine("2. Ta bort en produkt");
 			Console.WriteLine("3. Uppdatera en produkt");
@@ -53,11 +55,10 @@ internal class Menu
 					break;
 				case "6":
 					keepRunning = false;
-
-
-					var mainMenu = new MainMenu(sqliteFacade, mongoFacade);
-					await mainMenu.ShowMainMenuAsync();
+					MenuDb menuDb = new MenuDb(sqliteFacade, mongoFacade);
+					await menuDb.ShowMainMenuAsync();
 					break;
+				
 				case "0":
 					Console.WriteLine("Programmet avslutas. Tack för att du använde Henriks Hobbylager!");
 					Environment.Exit(0);
@@ -95,7 +96,7 @@ internal class Menu
 	{
 		Console.ForegroundColor = ConsoleColor.Green;
 		Console.WriteLine("========================================");
-		Console.WriteLine("         Henriks Hobbylager Menu        ");
+		Console.WriteLine("         Henriks Hobbylager MenuCrud        ");
 		Console.WriteLine("========================================");
 		Console.ResetColor();
 	}

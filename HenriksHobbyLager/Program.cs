@@ -11,9 +11,18 @@ internal class Program
     static async Task Main(string[] args)
     {
         var sqliteFacade = CreateSqLiteFacade();
+        if (sqliteFacade == null)
+        {
+            throw new ArgumentNullException(nameof(sqliteFacade), "SQLite Facade creation failed.");
+        }
+        
         var mongoFacade = CreateMongoFacade();
+        if (mongoFacade == null)
+        {
+            throw new ArgumentNullException(nameof(mongoFacade), "Mongo Facade creation failed.");
+        }
 
-        var mainMenu = new MainMenu(sqliteFacade, mongoFacade);
+        var mainMenu = new MenuDb(sqliteFacade, mongoFacade);
         await mainMenu.ShowMainMenuAsync();
     }
 
