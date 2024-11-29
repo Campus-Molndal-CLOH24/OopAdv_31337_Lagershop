@@ -42,7 +42,9 @@ internal class Program
 
         var mongoConnectionString = configuration.GetConnectionString("MongoDbConnection");
         var mongoDatabaseName = configuration["ConnectionStrings:MongoDbName"];
-        var mongoRepository = new MongoRepository(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
+    
+        var mongoDbContext = MongoDbContext.Instance(mongoConnectionString!, mongoDatabaseName!);
+        var mongoRepository = new MongoRepository(mongoDbContext);
         return new ProductFacade(mongoRepository);
     }
 }
