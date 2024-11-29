@@ -50,9 +50,6 @@ internal class ProductFacade : IProductFacade
 
 	public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
 	{
-		if (string.IsNullOrWhiteSpace(searchTerm))
-			return Enumerable.Empty<Product>(); // Returnera en tom lista om termen är null/empty.
-		
 		return await _repository.GetAllAsync(p =>
 			p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
 			p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
