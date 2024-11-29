@@ -41,7 +41,7 @@ internal class MenuDb
 			case "1":
 				Console.Clear();
 				Console.WriteLine("🔧 Öppnar SQLite...");
-				await Task.Delay(1000); // Simulerar att något laddar
+				await Task.Delay(1000); // Simulating that something is loading
 				var menuSQLite = new MenuCrud(_sqliteFacade, _sqliteFacade, _mongoFacade);
 				await menuSQLite.ShowMenu();
 				break;

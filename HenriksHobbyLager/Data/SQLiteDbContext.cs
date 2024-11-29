@@ -12,7 +12,7 @@ namespace HenriksHobbylager.Data
 
         private readonly string _dbPath;
 
-        private static SQLiteDbContext? _instance;
+        // private static SQLiteDbContext? _instance;
         private static readonly object _lock = new();
 
         // Singleton-pattern instance of SQLiteDbContext with thread-safe lazy initialization
