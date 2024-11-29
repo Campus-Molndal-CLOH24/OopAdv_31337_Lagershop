@@ -5,10 +5,11 @@ namespace HenriksHobbylager.UI;
 internal class MenuCrud
 {
 	private readonly IProductFacade _currentFacade;
-	private IProductFacade sqliteFacade;
-	private IProductFacade mongoFacade;
+	private readonly IProductFacade sqliteFacade;
+	private readonly IProductFacade mongoFacade;
 
-	public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProductFacade mongoFacade)
+    // We use .this to make sure that the current facade is the one that is used in the CRUD operations.
+    public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProductFacade mongoFacade)
 	{
 		_currentFacade = currentFacade ?? throw new ArgumentNullException(nameof(currentFacade));
 		this.sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade));
@@ -55,18 +56,16 @@ internal class MenuCrud
 					break;
 				case "6":
 					keepRunning = false;
-					MenuDb menuDb = new MenuDb(sqliteFacade, mongoFacade);
+					var menuDb = new MenuDb(sqliteFacade, mongoFacade);
 					await menuDb.ShowMainMenuAsync();
 					break;
-				
 				case "0":
-					Console.WriteLine("Programmet avslutas. Tack för att du använde Henriks Hobbylager!");
-					Environment.Exit(0);
+                    DisplayColourMessage("Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
+                    Environment.Exit(0);
 					break;
 				default:
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("Felaktigt val. Försök igen.");
-					Console.ResetColor();
+                    DisplayColourMessage("Felaktigt val. Försök igen.", ConsoleColor.Red);
+                    Console.ResetColor();
 					break;
 			}
 
@@ -80,13 +79,13 @@ internal class MenuCrud
 
 				if (choice == "0")
 				{
-					Console.WriteLine("Programmet avslutas. Tack för att du använde Henriks Hobbylager!");
-					Environment.Exit(0);
+                    DisplayColourMessage("Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
+                    Environment.Exit(0);
 				}
 				else if (choice != "1")
 				{
-					Console.WriteLine("Felaktigt val. Programmet avslutas.");
-					Environment.Exit(0);
+                    DisplayColourMessage("Felaktigt val. Programmet avslutas.", ConsoleColor.Red);
+                    Environment.Exit(0);
 				}
 			}
 		}
@@ -94,41 +93,33 @@ internal class MenuCrud
 
 	private static void DisplayMenuHeader()
 	{
-		Console.ForegroundColor = ConsoleColor.Green;
-		Console.WriteLine("========================================");
-		Console.WriteLine("         Henriks Hobbylager MenuCrud        ");
-		Console.WriteLine("========================================");
-		Console.ResetColor();
-	}
+        DisplayColourMessage("========================================", ConsoleColor.Green);
+        DisplayColourMessage("         Henriks Hobbylager MenuCrud        ", ConsoleColor.Green);
+        DisplayColourMessage("========================================", ConsoleColor.Green);
+    }
 
-	private async Task AddProduct()
+    private async Task AddProduct()
 	{
         var name = GetNonNullInput("Ange produktnamn: ");
 
         Console.WriteLine("Ange pris:");
 		if (!decimal.TryParse(Console.ReadLine(), out var price))
 		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Ogiltigt pris. Försök igen.");
-			Console.ResetColor();
-			return;
+            DisplayColourMessage("Ogiltigt pris. Försök igen.", ConsoleColor.Red);
+            return;
 		}
 
 		Console.WriteLine("Ange lagerantal:");
 		if (!int.TryParse(Console.ReadLine(), out var stock))
 		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Ogiltigt lagerantal. Försök igen.");
-			Console.ResetColor();
-			return;
+            DisplayColourMessage("Ogiltigt lagerantal. Försök igen.", ConsoleColor.Red);
+            return;
 		}
 
-		var product = new Product { Name = name, Price = price, Stock = stock };
-		await _currentFacade.CreateProductAsync(product.Name, product.Stock, product.Price);
-		Console.ForegroundColor = ConsoleColor.Green;
-		Console.WriteLine("Produkten lades till.");
-		Console.ResetColor();
-	}
+		// var product = new Product { Name = name, Price = price, Stock = stock };
+		await _currentFacade.CreateProductAsync(name, stock, price);
+        DisplayColourMessage("Produkten lades till.", ConsoleColor.Green);
+    }
 
     private async Task UpdateProduct()
     {
@@ -139,16 +130,14 @@ internal class MenuCrud
 
         var searchOption = Console.ReadLine();
 
-        Product product = null;
+        Product? product = null;
 
         if (searchOption == "1")
         {
             Console.Write("Ange ID för produkten som ska uppdateras: ");
             if (!int.TryParse(Console.ReadLine(), out var id))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Ogiltigt ID. Försök igen.");
-                Console.ResetColor();
+                DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
                 return;
             }
 
@@ -161,9 +150,7 @@ internal class MenuCrud
             var products = await _currentFacade.SearchProductsAsync(name);
             if (!products.Any())
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Ingen produkt hittades med det angivna namnet.");
-                Console.ResetColor();
+                DisplayColourMessage("Ingen produkt hittades med det angivna namnet.", ConsoleColor.Red);
                 return;
             }
 
@@ -180,9 +167,7 @@ internal class MenuCrud
                 Console.Write("Ange ID för produkten du vill uppdatera: ");
                 if (!int.TryParse(Console.ReadLine(), out var id))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Ogiltigt ID. Försök igen.");
-                    Console.ResetColor();
+                    DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
                     return;
                 }
 
@@ -195,17 +180,13 @@ internal class MenuCrud
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Ogiltigt alternativ. Försök igen.");
-            Console.ResetColor();
+            DisplayColourMessage("Ogiltigt alternativ. Försök igen.", ConsoleColor.Red);
             return;
         }
 
         if (product == null)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Produkten kunde inte hittas.");
-            Console.ResetColor();
+            DisplayColourMessage("Produkten kunde inte hittas.", ConsoleColor.Red);
             return;
         }
 
@@ -221,9 +202,7 @@ internal class MenuCrud
         if (int.TryParse(Console.ReadLine(), out var newStock)) product.Stock = newStock;
 
         await _currentFacade.UpdateProductAsync(product);
-        Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Produkten har uppdaterats.");
-        Console.ResetColor();
+        DisplayColourMessage("Produkten har uppdaterats.", ConsoleColor.Green);
     }
 
     private async Task DeleteProduct()
@@ -231,62 +210,42 @@ internal class MenuCrud
 		Console.Write("Ange ID för produkten som ska tas bort: ");
 		if (!int.TryParse(Console.ReadLine(), out var id))
 		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Ogiltigt ID. Försök igen.");
-			Console.ResetColor();
+            DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
 			return;
 		}
 
 		await _currentFacade.DeleteProductAsync(id);
-		Console.ForegroundColor = ConsoleColor.Green;
-		Console.WriteLine("Produkten har tagits bort.");
-		Console.ResetColor();
-	}
+        DisplayColourMessage("Produkten har tagits bort.", ConsoleColor.Green);
+    }
 
-    private async Task SearchProducts(bool forUpdate = false)
+    private async Task SearchProducts()
     {
         var searchTerm = GetNonNullInput("Ange sökterm: ");
+        var products = await _currentFacade.SearchProductsAsync(searchTerm);
 
-        try
+        if (products.Any())
         {
-            var products = await _currentFacade.SearchProductsAsync(searchTerm);
+            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            DisplayColourMessage("            SÖKRESULTAT                 ", ConsoleColor.Cyan);
+            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
 
-            if (products.Any())
+            Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
+            Console.WriteLine(new string('-', 50));
+
+            foreach (var product in products)
             {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("=========================================");
-                Console.WriteLine("            SÖKRESULTAT                 ");
-                Console.WriteLine("=========================================");
-                Console.ResetColor();
-
-                Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
-                Console.WriteLine(new string('-', 50));
-
-                foreach (var product in products)
-                {
-                    Console.WriteLine("{0, -5} | {1, -20} | {2, -10:C} | {3, -10}",
-                        product.Id,
-                        product.Name,
-                        product.Price,
-                        product.Stock);
-                }
-
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("=========================================");
-                Console.ResetColor();
+                Console.WriteLine("{0, -5} | {1, -20} | {2, -10:C} | {3, -10}",
+                    product.Id,
+                    product.Name,
+                    product.Price,
+                    product.Stock);
             }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Inga produkter hittades.");
-                Console.ResetColor();
-            }
+
+            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
         }
-        catch (Exception ex)
+        else
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Ett fel inträffade: {ex.Message}");
-            Console.ResetColor();
+            DisplayColourMessage("Inga produkter hittades.", ConsoleColor.Red);
         }
     }
 
@@ -296,13 +255,11 @@ internal class MenuCrud
 
 		if (products.Any())
 		{
-			Console.ForegroundColor = ConsoleColor.Cyan;
-			Console.WriteLine("=========================================");
-			Console.WriteLine("            PRODUKTKATALOG              ");
-			Console.WriteLine("=========================================");
-			Console.ResetColor();
+            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            DisplayColourMessage("            PRODUKTKATALOG              ", ConsoleColor.Cyan);
+            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
 
-			Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
+            Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
 			Console.WriteLine(new string('-', 50));
 
 			foreach (var product in products)
@@ -314,30 +271,32 @@ internal class MenuCrud
 								  product.Stock);
 			}
 
-			Console.ForegroundColor = ConsoleColor.Cyan;
-			Console.WriteLine("=========================================");
-			Console.ResetColor();
-		}
-		else
-		{
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Inga produkter hittades.");
-			Console.ResetColor();
-		}
-	}
+            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
 
-	private static string GetNonNullInput(string prompt)
+        }
+        else
+		{
+            DisplayColourMessage("Inga produkter hittades.", ConsoleColor.Red);
+        }
+    }
+
+    private static string GetNonNullInput(string prompt)
     {
         Console.Write(prompt);
 		var input = Console.ReadLine();
 		while (string.IsNullOrWhiteSpace(input))
 		{
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Fältet får inte vara tomt. Försök igen.");
-            Console.ResetColor();
+            DisplayColourMessage("Fältet får inte vara tomt. Försök igen.", ConsoleColor.Red);
             Console.Write(prompt);
             input = Console.ReadLine();
         }
 		return input;
+    }
+
+	private static void DisplayColourMessage(string message, ConsoleColor colour)
+    {
+        Console.ForegroundColor = colour;
+        Console.WriteLine(message);
+        Console.ResetColor();
     }
 }
