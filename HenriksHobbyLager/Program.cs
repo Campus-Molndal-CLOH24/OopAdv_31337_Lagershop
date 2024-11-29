@@ -28,16 +28,10 @@ internal class Program
 
     private static IProductFacade CreateSqLiteFacade()
     {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-        var dbPath = configuration.GetConnectionString("DatabasePath");
-        var sqliteRepository = new SQLiteRepository(new SQLiteDbContext(dbPath));
+        var sqliteRepository = new SQLiteRepository(new SQLiteDbContext());
         return new ProductFacade(sqliteRepository);
     }
-
+    
     private static IProductFacade CreateMongoFacade()
     {
         var configuration = new ConfigurationBuilder()

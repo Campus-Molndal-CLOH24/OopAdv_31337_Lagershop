@@ -1,5 +1,6 @@
 ﻿using HenriksHobbylager.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace HenriksHobbylager.Data;
 public class SQLiteDbContext : DbContext
@@ -9,9 +10,27 @@ public class SQLiteDbContext : DbContext
     public DbSet<Product> Products { get; set; }
     private readonly string _dbPath;
 
-    public SQLiteDbContext(string dbPath)
+    public SQLiteDbContext()
     {
-        _dbPath = dbPath ?? throw new ArgumentNullException(nameof(dbPath));
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory) // Starta från körningskatalogen
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+
+        var relativePath = configuration["ConnectionStrings:DatabasePath"];
+        if (string.IsNullOrWhiteSpace(relativePath))
+            throw new ArgumentNullException("DatabasePath saknas i appsettings.json");
+
+        // Gå upp tre nivåer från `bin/Debug/netX.0/` till projektets rotkatalog
+        var projectRoot = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory)?.Parent?.Parent?.Parent?.FullName;
+        if (string.IsNullOrWhiteSpace(projectRoot))
+            throw new InvalidOperationException("Projektets root kunde inte identifieras.");
+
+        // Kombinera projektroten med den relativa pathen
+        _dbPath = Path.Combine(projectRoot, relativePath);
+
+        // Debug-utskrift för att verifiera path
+        Console.WriteLine($"Resolved SQLite Database Path: {_dbPath}");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
