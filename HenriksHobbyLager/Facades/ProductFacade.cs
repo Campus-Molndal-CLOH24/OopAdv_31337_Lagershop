@@ -1,6 +1,7 @@
 ﻿using HenriksHobbylager.Interface;
 using HenriksHobbylager.Models;
 using HenriksHobbylager.Repositories;
+using HenriksHobbyLager.Repositories;
 
 namespace HenriksHobbyLager.Facades;
 
@@ -35,22 +36,22 @@ internal class ProductFacade : IProductFacade
 		await _repository.DeleteAsync(productId);
 	}
 
-	public async Task UpdateProductAsync(Product product)
-	{
-		var products = await _repository.GetByIdAsync(product.Id);
-		if (products == null) throw new ArgumentException($"Product with ID {product.Id} not found.");
-		var productss = new Product
-		{
-			Name = products.Name,
-			Stock = products.Stock,
-			Price = products.Price,
-			LastUpdated = DateTime.Now
+    public async Task UpdateProductAsync(Product product)
+    {
+        var existingProduct = await _repository.GetByIdAsync(product.Id);
+        if (existingProduct == null)
+        {
+            throw new InvalidOperationException("Produkten kunde inte hittas.");
+        }
 
-		};
-		await _repository.UpdateAsync(productss);
-	}
+        existingProduct.Name = product.Name;
+        existingProduct.Price = product.Price;
+        existingProduct.Stock = product.Stock;
 
-	public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
+        await _repository.UpdateAsync(existingProduct);
+    }
+
+    public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
 	{
 		if (string.IsNullOrWhiteSpace(searchTerm))
 		{
@@ -69,6 +70,8 @@ internal class ProductFacade : IProductFacade
 		return await _repository.GetAllAsync(p => true);
 	}
 
-
-
+    public async Task<Product?> GetProductByIdAsync(int productId)
+    {
+        return await _repository.GetByIdAsync(productId);
+    }
 }

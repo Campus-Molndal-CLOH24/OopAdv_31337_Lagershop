@@ -8,8 +8,7 @@ internal interface IProductFacade
     Task CreateProductAsync(string productName, int productQuantity, decimal productPrice);
     Task DeleteProductAsync(int productId);
     Task UpdateProductAsync(Product product);
-    // Task<Product> SearchProductAsync(int productId);
-    // IEnumerable<Product> SearchProductAsync(string? term);
+    Task<Product?> GetProductByIdAsync(int productId);
     Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm);
     Task<IEnumerable<Product>> GetAllProductsAsync();
 
