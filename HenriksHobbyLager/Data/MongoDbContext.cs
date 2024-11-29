@@ -1,6 +1,4 @@
 ﻿using HenriksHobbylager.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 
 namespace HenriksHobbylager.Data;
@@ -10,6 +8,7 @@ public class MongoDbContext
     private static MongoDbContext? _instance;
     private static readonly object _lock = new();
 
+    // Constructor: Initializes the database connection, used internally for the Singleton-pattern
     private MongoDbContext(string connectionString, string databaseName)
     {
         if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(databaseName))
@@ -34,6 +33,7 @@ public class MongoDbContext
         return _instance;
     }
 
+    // Lambda shortcut to access the 'Products' collection in the database
     public IMongoCollection<Product> Products =>
         Database.GetCollection<Product>("Products");
 }

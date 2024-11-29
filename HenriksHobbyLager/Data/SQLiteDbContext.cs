@@ -15,26 +15,13 @@ namespace HenriksHobbylager.Data
         private static SQLiteDbContext? _instance;
         private static readonly object _lock = new();
 
-        public static SQLiteDbContext Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_instance == null)
-                        {
-                            _instance = new SQLiteDbContext();
-                        }
-                    }
-                }
-                return _instance;
-            }
-        }
+        // Singleton-pattern instance of SQLiteDbContext with thread-safe lazy initialization
+        private static readonly Lazy<SQLiteDbContext> _lazyInstance = new(() => new SQLiteDbContext());
+        public static SQLiteDbContext Instance => _lazyInstance.Value;
 
         private SQLiteDbContext()
         {
+            // Load database path from appsettings.json, relative to project root to avoid issues with different paths/environment
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -49,8 +36,6 @@ namespace HenriksHobbylager.Data
                 throw new InvalidOperationException("Projektets root kunde inte identifieras.");
 
             _dbPath = Path.Combine(projectRoot, relativePath);
-
-            Console.WriteLine($"Resolved SQLite Database Path: {_dbPath}");
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
@@ -58,6 +43,7 @@ namespace HenriksHobbylager.Data
             options.UseSqlite($"Data Source={_dbPath}");
         }
 
+        // ModelBuilder configures table mappings, indexes and relationships between entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
