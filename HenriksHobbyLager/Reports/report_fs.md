@@ -12,6 +12,10 @@ Svara på frågorna nedan och lämna in det som en del av din inlämning.
 ## Vilka SOLID-principer implementerade ni och hur?
 
 ## Vilka patterns använde ni och varför?
+- Repository pattern användes för att separera dataåtkomst från affärslogik och för att göra det enklare att byta databas i framtiden.
+- Vilket var bra för sen införande vi MongoDB.
+- Factory pattern användes för att skapa en DbContext för att kunna använda olika databaser.
+- Singleton för SQLite och MongoDB.
 
 ## Vilka tekniska utmaningar stötte ni på och hur löste ni dem?
 - MongoDB skapar en hel massa filer, så valde att se MongoDB som en fristående VPS som kör Docker Composer och inte 
@@ -29,7 +33,9 @@ Svara på frågorna nedan och lämna in det som en del av din inlämning.
 - Satte upp MongoDB via Docker Composer och skapade en DbContext för att kunna använda MongoDB.
   CRUD kopplingarna ska fungera, även om det inte finns någon förinmatad data i DBn.
 - Skapade en logo med hjälpa av ChatGTP, och la in den i README.md så den syns i GitHub.
-- Refaktoriserade search så den fungerade med EF.
+- Refaktoriserade getAllProducts så den fungerade med EF.
+- Refaktoriserade search för produkter (namn) så den fungerade med EF.
+- Implementerade singletons för SQLite och MongoDB.
 
 ## Vilka utmaningar stötte du på och hur löste du dem?
 

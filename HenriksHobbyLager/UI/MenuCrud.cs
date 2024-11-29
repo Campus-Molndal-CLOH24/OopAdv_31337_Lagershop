@@ -8,11 +8,11 @@ internal class MenuCrud
 	private IProductFacade sqliteFacade;
 	private IProductFacade mongoFacade;
 
-	public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade = null, IProductFacade mongoFacade = null)
+	public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProductFacade mongoFacade)
 	{
 		_currentFacade = currentFacade ?? throw new ArgumentNullException(nameof(currentFacade));
-		this.sqliteFacade = sqliteFacade ?? currentFacade;
-		this.mongoFacade = mongoFacade ?? currentFacade;
+		this.sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade));
+		this.mongoFacade = mongoFacade ?? throw new ArgumentNullException(nameof(mongoFacade));
 	}
 
 	internal async Task ShowMenu()

@@ -28,9 +28,10 @@ internal class Program
 
     private static IProductFacade CreateSqLiteFacade()
     {
-        var sqliteRepository = new SQLiteRepository(new SQLiteDbContext());
+        var sqliteRepository = new SQLiteRepository(SQLiteDbContext.Instance);
         return new ProductFacade(sqliteRepository);
     }
+
     
     private static IProductFacade CreateMongoFacade()
     {
