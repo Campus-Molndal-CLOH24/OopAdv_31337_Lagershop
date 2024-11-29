@@ -29,6 +29,7 @@ Svara på frågorna nedan och lämna in det som en del av din inlämning.
 - Satte upp MongoDB via Docker Composer och skapade en DbContext för att kunna använda MongoDB.
   CRUD kopplingarna ska fungera, även om det inte finns någon förinmatad data i DBn.
 - Skapade en logo med hjälpa av ChatGTP, och la in den i README.md så den syns i GitHub.
+- Refaktoriserade search så den fungerade med EF.
 
 ## Vilka utmaningar stötte du på och hur löste du dem?
 
