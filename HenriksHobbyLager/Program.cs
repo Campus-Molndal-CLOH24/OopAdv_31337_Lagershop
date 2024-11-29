@@ -10,7 +10,7 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        var sqliteFacade = CreateSqLiteFacade();
+        var sqliteFacade = await CreateSqLiteFacadeAsync();
         if (sqliteFacade == null)
         {
             throw new ArgumentNullException(nameof(sqliteFacade), "SQLite Facade creation failed.");
@@ -26,15 +26,19 @@ internal class Program
         await mainMenu.ShowMainMenuAsync();
     }
 
-    private static IProductFacade CreateSqLiteFacade()
+    private static async Task<IProductFacade> CreateSqLiteFacadeAsync()
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json")
             .Build();
 
-        var dbPath = configuration.GetConnectionString("DatabasePath");
-        var sqliteRepository = new SQLiteRepository(new SQLiteDbContext(dbPath));
+        var relativeDbPath = configuration.GetConnectionString("DatabasePath");
+        var absoluteDbPath = Path.Combine(Directory.GetCurrentDirectory(), relativeDbPath);
+        var dbContext = new SQLiteDbContext(absoluteDbPath);
+        await dbContext.Database.EnsureCreatedAsync();
+        var sqliteRepository = new SQLiteRepository(dbContext);
+        
         return new ProductFacade(sqliteRepository);
     }
 
