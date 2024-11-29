@@ -6,9 +6,10 @@ namespace HenriksHobbylager.Data
 {
     public class SQLiteDbContext : DbContext
     {
-        public DbSet<Order> Orders { get; set; }
-        public DbSet<OrderItem> OrderItems { get; set; }
-        public DbSet<Product> Products { get; set; }
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<Product> Products { get; set; } = null!;
+
         private readonly string _dbPath;
 
         private static SQLiteDbContext? _instance;
