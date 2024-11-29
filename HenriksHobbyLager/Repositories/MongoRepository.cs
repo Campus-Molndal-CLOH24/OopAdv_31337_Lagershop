@@ -26,20 +26,14 @@ public class MongoRepository : IRepository<Product>
         }
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync()
+    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
     {
-        return await _collection.Find(_ => true).ToListAsync();
+        return await _collection.Find(predicate).ToListAsync();
     }
 
     public async Task<Product?> GetByIdAsync(int id)
     {
         return await _collection.Find(p => p.Id == id).FirstOrDefaultAsync();
-    }
-
-    public async Task<IEnumerable<Product>> GetAllAsync(Func<Product, bool> predicate)
-    {
-        var allProducts = await _collection.Find(_ => true).ToListAsync();
-        return allProducts.Where(predicate);
     }
 
     public async Task UpdateAsync(Product entity)
@@ -60,23 +54,19 @@ public class MongoRepository : IRepository<Product>
         }
     }
 
+    public async Task DeleteAsync(Product entity)
+    {
+        await _collection.DeleteOneAsync(p => p.Id == entity.Id);
+    }
+
     public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
     {
         return await _collection.Find(predicate).ToListAsync();
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
-    {
-        return await _collection.Find(predicate).ToListAsync();
-    }
-
+    // No-op for MongoDB since changes are saved immediately. We keep this for now though since it's part of the interface.
     public Task SaveChangesAsync()
     {
         return Task.CompletedTask;
-    }
-
-    public async Task DeleteAsync(Product entity)
-    {
-        await _collection.DeleteOneAsync(p => p.Id == entity.Id);
     }
 }

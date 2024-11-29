@@ -1,7 +1,6 @@
 ﻿using HenriksHobbylager.Interface;
 using HenriksHobbylager.Models;
 using HenriksHobbylager.Repositories;
-using HenriksHobbyLager.Repositories;
 
 namespace HenriksHobbyLager.Facades;
 

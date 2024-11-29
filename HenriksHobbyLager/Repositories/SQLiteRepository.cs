@@ -1,10 +1,9 @@
 ﻿using System.Linq.Expressions;
 using HenriksHobbylager.Data;
 using HenriksHobbylager.Models;
-using HenriksHobbylager.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace HenriksHobbyLager.Repositories;
+namespace HenriksHobbylager.Repositories;
 
 public class SQLiteRepository : IRepository<Product>
 {
@@ -30,9 +29,9 @@ public class SQLiteRepository : IRepository<Product>
         }
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync()
+    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.Where(predicate).ToListAsync();
     }
 
     public async Task<Product?> GetByIdAsync(int id)
@@ -40,16 +39,6 @@ public class SQLiteRepository : IRepository<Product>
         return await _dbSet.FindAsync(id);
     }
 
-
-    public async Task<IEnumerable<Product>> GetAllAsync(Func<Product, bool> predicate)
-    {
-        return await Task.FromResult(_dbSet.Where(predicate).AsEnumerable());
-    }
-
-    public async Task SaveChangesAsync()
-    {
-        await _context.SaveChangesAsync();
-    }
 
     public async Task UpdateAsync(Product entity)
     {
@@ -78,8 +67,9 @@ public class SQLiteRepository : IRepository<Product>
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
+
+    public async Task SaveChangesAsync()
     {
-        return await _dbSet.Where(predicate).ToListAsync();
+        await _context.SaveChangesAsync();
     }
 }

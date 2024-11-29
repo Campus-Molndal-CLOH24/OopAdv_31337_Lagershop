@@ -3,7 +3,6 @@ using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Repositories;
 using HenriksHobbylager.Interface;
 using Microsoft.Extensions.Configuration;
-using HenriksHobbyLager.Repositories;
 
 namespace HenriksHobbylager;
 internal class Program
