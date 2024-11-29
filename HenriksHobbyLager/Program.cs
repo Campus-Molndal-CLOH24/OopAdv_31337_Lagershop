@@ -28,9 +28,10 @@ internal class Program
 
     private static IProductFacade CreateSqLiteFacade()
     {
-        var sqliteRepository = new SQLiteRepository(new SQLiteDbContext());
+        var sqliteRepository = new SQLiteRepository(SQLiteDbContext.Instance);
         return new ProductFacade(sqliteRepository);
     }
+
     
     private static IProductFacade CreateMongoFacade()
     {
@@ -41,7 +42,9 @@ internal class Program
 
         var mongoConnectionString = configuration.GetConnectionString("MongoDbConnection");
         var mongoDatabaseName = configuration["ConnectionStrings:MongoDbName"];
-        var mongoRepository = new MongoRepository(new MongoDbContext(mongoConnectionString, mongoDatabaseName));
+    
+        var mongoDbContext = MongoDbContext.Instance(mongoConnectionString!, mongoDatabaseName!);
+        var mongoRepository = new MongoRepository(mongoDbContext);
         return new ProductFacade(mongoRepository);
     }
 }

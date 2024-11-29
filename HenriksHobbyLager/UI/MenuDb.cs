@@ -42,14 +42,14 @@ internal class MenuDb
 				Console.Clear();
 				Console.WriteLine("🔧 Öppnar SQLite...");
 				await Task.Delay(1000); // Simulerar att något laddar
-				var menuSQLite = new MenuCrud(_sqliteFacade);
+				var menuSQLite = new MenuCrud(_sqliteFacade, _sqliteFacade, _mongoFacade);
 				await menuSQLite.ShowMenu();
 				break;
 			case "2":
 				Console.Clear();
 				Console.WriteLine("🌐 Öppnar MongoDB...");
 				await Task.Delay(1000);
-				var menuMongo = new MenuCrud(_mongoFacade);
+				var menuMongo = new MenuCrud(_mongoFacade, _sqliteFacade, _mongoFacade);
 				await menuMongo.ShowMenu();
 				break;
 			case "0":
