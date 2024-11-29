@@ -1,77 +1,75 @@
 using HenriksHobbylager.UI;
-using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Interface;
 
-namespace HenriksHobbylager
+namespace HenriksHobbylager;
+
+internal class MainMenu
 {
-	internal class MainMenu
+	private readonly IProductFacade _sqliteFacade;
+	private readonly IProductFacade _mongoFacade;
+
+	public MainMenu(IProductFacade sqliteFacade, IProductFacade mongoFacade)
 	{
-		private readonly IProductFacade _sqliteFacade;
-		private readonly IProductFacade _mongoFacade;
+		_sqliteFacade = sqliteFacade;
+		_mongoFacade = mongoFacade;
+	}
+	public async Task ShowMainMenuAsync()
+	{
+		Console.Clear();
+		Console.ForegroundColor = ConsoleColor.Green;
+		PrintCentered("========================================");
+		PrintCentered("       🎉 Henriks Hobbylager 🎉        ");
+		PrintCentered("========================================");
+		Console.ResetColor();
 
-		public MainMenu(IProductFacade sqliteFacade, IProductFacade mongoFacade)
+		Console.WriteLine();
+		Console.ForegroundColor = ConsoleColor.Yellow;
+		Console.WriteLine("Vad vill du göra idag?");
+		Console.WriteLine("----------------------------------------");
+		Console.ResetColor();
+
+		Console.WriteLine("[1] 📂 SQLite");
+		Console.WriteLine("[2] 🌐 MongoDB");
+		Console.WriteLine("[0] ❌ Avsluta");
+		Console.WriteLine("----------------------------------------");
+		Console.Write("Välj ett alternativ: ");
+
+		var menuOption = Console.ReadLine();
+
+		switch (menuOption)
 		{
-			_sqliteFacade = sqliteFacade;
-			_mongoFacade = mongoFacade;
+			case "1":
+				Console.Clear();
+				Console.WriteLine("🔧 Öppnar SQLite...");
+				await Task.Delay(1000); // Simulerar att något laddar
+				var menuSQLite = new Menu(_sqliteFacade);
+				await menuSQLite.ShowMenu();
+				break;
+			case "2":
+				Console.Clear();
+				Console.WriteLine("🌐 Öppnar MongoDB...");
+				await Task.Delay(1000);
+				var menuMongo = new Menu(_mongoFacade);
+				await menuMongo.ShowMenu();
+				break;
+			case "0":
+				Console.WriteLine("❌ Avslutar programmet. Tack för att du använde Henriks Hobbylager!");
+				Console.ReadKey();
+				Environment.Exit(0);
+				break;
+			default:
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine("❌ Felaktigt val. Försök igen.");
+				Console.ResetColor();
+				break;
 		}
-		public async Task ShowMainMenuAsync()
-		{
-			Console.Clear();
-			Console.ForegroundColor = ConsoleColor.Green;
-			PrintCentered("========================================");
-			PrintCentered("       🎉 Henriks Hobbylager 🎉        ");
-			PrintCentered("========================================");
-			Console.ResetColor();
+	}
 
-			Console.WriteLine();
-			Console.ForegroundColor = ConsoleColor.Yellow;
-			Console.WriteLine("Vad vill du göra idag?");
-			Console.WriteLine("----------------------------------------");
-			Console.ResetColor();
-
-			Console.WriteLine("[1] 📂 SQLite");
-			Console.WriteLine("[2] 🌐 MongoDB");
-			Console.WriteLine("[0] ❌ Avsluta");
-			Console.WriteLine("----------------------------------------");
-			Console.Write("Välj ett alternativ: ");
-
-			var menuOption = Console.ReadLine();
-
-			switch (menuOption)
-			{
-				case "1":
-					Console.Clear();
-					Console.WriteLine("🔧 Öppnar SQLite...");
-					await Task.Delay(1000); // Simulerar att något laddar
-					var menuSQLite = new Menu(_sqliteFacade);
-					await menuSQLite.ShowMenu();
-					break;
-				case "2":
-					Console.Clear();
-					Console.WriteLine("🌐 Öppnar MongoDB...");
-					await Task.Delay(1000);
-					var menuMongo = new Menu(_mongoFacade);
-					await menuMongo.ShowMenu();
-					break;
-				case "0":
-					Console.WriteLine("❌ Avslutar programmet. Tack för att du använde Henriks Hobbylager!");
-					Console.ReadKey();
-					Environment.Exit(0);
-					break;
-				default:
-					Console.ForegroundColor = ConsoleColor.Red;
-					Console.WriteLine("❌ Felaktigt val. Försök igen.");
-					Console.ResetColor();
-					break;
-			}
-		}
-
-		private void PrintCentered(string text)
-		{
-			int windowWidth = Console.WindowWidth;
-			int textPadding = (windowWidth - text.Length) / 2;
-			Console.WriteLine(new string(' ', textPadding) + text);
-		}
+	private void PrintCentered(string text)
+	{
+		int windowWidth = Console.WindowWidth;
+		int textPadding = (windowWidth - text.Length) / 2;
+		Console.WriteLine(new string(' ', textPadding) + text);
 	}
 }
 

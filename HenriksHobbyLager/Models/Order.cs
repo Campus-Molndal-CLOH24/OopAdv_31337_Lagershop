@@ -9,5 +9,4 @@ public class Order
 	public DateTime OrderDate { get; set; } = DateTime.Now;
 	public decimal TotalPrice { get; set; }
 	public required ICollection<OrderItem> OrderItems { get; set; }
-
 }

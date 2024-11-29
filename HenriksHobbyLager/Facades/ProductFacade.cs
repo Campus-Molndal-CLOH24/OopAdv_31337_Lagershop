@@ -22,8 +22,6 @@ internal class ProductFacade : IProductFacade
 			Name = productName,
 			Stock = productStock,
 			Price = productPrice,
-			// Created = DateTime.Now,
-			// LastUpdated = DateTime.Now
 		};
 
 		await _repository.AddAsync(product);

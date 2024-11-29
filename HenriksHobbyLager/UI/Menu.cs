@@ -1,8 +1,4 @@
 using HenriksHobbylager.Models;
-
-
-using HenriksHobbylager.Interface;
-using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Interface;
 
 namespace HenriksHobbylager.UI;

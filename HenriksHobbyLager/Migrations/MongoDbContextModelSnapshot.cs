@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HenriksHobbyLager.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(MongoDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
