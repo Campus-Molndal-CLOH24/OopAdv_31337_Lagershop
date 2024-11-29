@@ -190,23 +190,70 @@ internal class MenuCrud
 	private async Task SearchProducts()
 	{
 		Console.Write("Ange sökterm: ");
-		var term = Console.ReadLine();
+		var searchTerm = Console.ReadLine();
 
-		var products = await _currentFacade.SearchProductsAsync(term);
-
-		if (products.Any())
+		if (string.IsNullOrWhiteSpace(searchTerm))
 		{
-			foreach (var product in products)
+			throw new ArgumentException("Search term cannot be null or empty.", nameof(searchTerm));
+		}
+		
+		try
+		{
+			// Använd _currentFacade för att söka i den aktiva databasen
+			var products = await _currentFacade.SearchProductsAsync(searchTerm);
+
+			if (products.Any())
 			{
-				Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price:C}, Lager: {product.Stock}");
+				Console.ForegroundColor = ConsoleColor.Cyan;
+				Console.WriteLine("=========================================");
+				Console.WriteLine("            SÖKRESULTAT                 ");
+				Console.WriteLine("=========================================");
+				Console.ResetColor();
+
+				Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
+				Console.WriteLine(new string('-', 50));
+
+				foreach (var product in products)
+				{
+					Console.WriteLine("{0, -5} | {1, -20} | {2, -10:C} | {3, -10}",
+						product.Id,
+						product.Name,
+						product.Price,
+						product.Stock);
+				}
+
+				Console.ForegroundColor = ConsoleColor.Cyan;
+				Console.WriteLine("=========================================");
+				Console.ResetColor();
+			}
+			else
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine("Inga produkter hittades.");
+				Console.ResetColor();
 			}
 		}
-		else
+		catch (Exception ex)
 		{
 			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine("Inga produkter hittades.");
+			Console.WriteLine($"Ett fel inträffade: {ex.Message}");
 			Console.ResetColor();
 		}
+		
+		
+		// if (products.Any())
+		// {
+		// 	foreach (var product in products)
+		// 	{
+		// 		Console.WriteLine($"ID: {product.Id}, Namn: {product.Name}, Pris: {product.Price:C}, Lager: {product.Stock}");
+		// 	}
+		// }
+		// else
+		// {
+		// 	Console.ForegroundColor = ConsoleColor.Red;
+		// 	Console.WriteLine("Inga produkter hittades.");
+		// 	Console.ResetColor();
+		// }
 	}
 
 	private async Task ShowAllProducts()

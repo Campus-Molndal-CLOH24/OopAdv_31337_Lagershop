@@ -35,26 +35,6 @@ internal class ProductFacade : IProductFacade
 		await _repository.DeleteAsync(productId);
 	}
 
-	public async Task<IEnumerable<Product>> GetAllProductsAsync()
-	{
-		return await _repository.GetAllAsync();
-	}
-
-	public async Task<Product> SearchProductAsync(int productId)
-	{
-		var product = await _repository.GetByIdAsync(productId);
-		if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
-
-		return product;
-	}
-
-	public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
-	{
-		return await _repository.GetAllAsync(p =>
-			p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-			p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
-	}
-
 	public async Task UpdateProductAsync(Product product)
 	{
 		var products = await _repository.GetByIdAsync(product.Id);
@@ -70,10 +50,25 @@ internal class ProductFacade : IProductFacade
 		await _repository.UpdateAsync(productss);
 	}
 
-	public IEnumerable<Product> SearchProductAsync(string? term)
+	public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
 	{
-		throw new NotImplementedException();
+		if (string.IsNullOrWhiteSpace(searchTerm))
+		{
+			throw new ArgumentException("Search term cannot be null or empty.", nameof(searchTerm));
+		}
+
+		var lowerSearchTerm = searchTerm.ToLower();
+
+		return await _repository.SearchAsync(p =>
+			p.Name.ToLower().Contains(lowerSearchTerm) ||
+			p.Category.ToLower().Contains(lowerSearchTerm));
 	}
+
+	public async Task<IEnumerable<Product>> GetAllProductsAsync()
+	{
+		return await _repository.GetAllAsync(p => true);
+	}
+
 
 
 }
