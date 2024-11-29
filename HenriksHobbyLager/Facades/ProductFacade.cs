@@ -7,7 +7,7 @@ namespace HenriksHobbyLager.Facades;
 internal class ProductFacade : IProductFacade
 {
 	private readonly IRepository<Product> _repository;
-	public string DatabaseType { get; } 
+	public string DatabaseType { get; }
 
 	public ProductFacade(IRepository<Product> repository)
 	{
@@ -57,16 +57,25 @@ internal class ProductFacade : IProductFacade
 			p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 	}
 
-	public async Task UpdateProductAsync(int productId, string productName, int productQuantity, decimal productPrice)
+	public async Task UpdateProductAsync(Product product)
 	{
-		var product = await _repository.GetByIdAsync(productId);
-		if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
+		var products = await _repository.GetByIdAsync(product.Id);
+		if (products == null) throw new ArgumentException($"Product with ID {product.Id} not found.");
+		var productss = new Product
+		{
+			Name = products.Name,
+			Stock = products.Stock,
+			Price = products.Price,
+			LastUpdated = DateTime.Now
 
-		product.Name = productName;
-		product.Stock = productQuantity;
-		product.Price = productPrice;
-		product.LastUpdated = DateTime.Now;
-
-		await _repository.UpdateAsync(product);
+		};
+		await _repository.UpdateAsync(productss);
 	}
+
+	public IEnumerable<Product> SearchProductAsync(string? term)
+	{
+		throw new NotImplementedException();
+	}
+
+
 }
