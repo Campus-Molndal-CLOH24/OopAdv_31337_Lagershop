@@ -5,7 +5,7 @@ namespace HenriksHobbylager.Interface;
 internal interface IProductFacade
 {
     string DatabaseType { get; }
-    Task CreateProductAsync(string productName, int productQuantity, decimal productPrice);
+    Task CreateProductAsync(string productName, int productQuantity, decimal productPrice, string category);
     Task DeleteProductAsync(int productId);
     Task UpdateProductAsync(Product product);
     Task<Product?> GetProductByIdAsync(int productId);

@@ -16,13 +16,14 @@ internal class ProductFacade : IProductFacade
                repository is MongoRepository ? "MongoDB" : "Okänd"; // We added "okänd" to handle unknown database types
     }
 
-    public async Task CreateProductAsync(string productName, int productStock, decimal productPrice)
+    public async Task CreateProductAsync(string productName, int productStock, decimal productPrice, string category)
     {
         var product = new Product
         {
             Name = productName,
             Stock = productStock,
             Price = productPrice,
+            Category = category
         };
 
         await _repository.AddAsync(product);
