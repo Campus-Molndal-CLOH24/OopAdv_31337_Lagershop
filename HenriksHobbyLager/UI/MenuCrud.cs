@@ -1,5 +1,6 @@
 using HenriksHobbylager.Models;
 using HenriksHobbylager.Interface;
+using HenriksHobbyLager.UI;
 
 namespace HenriksHobbylager.UI;
 internal class MenuCrud
@@ -60,11 +61,11 @@ internal class MenuCrud
 					await menuDb.ShowMainMenuAsync();
 					break;
 				case "0":
-                    DisplayColourMessage("Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
+                    ConsoleHelper.DisplayColourMessage("Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
                     Environment.Exit(0);
 					break;
 				default:
-                    DisplayColourMessage("Felaktigt val. Försök igen.", ConsoleColor.Red);
+                    ConsoleHelper.DisplayColourMessage("Felaktigt val. Försök igen.", ConsoleColor.Red);
                     Console.ResetColor();
 					break;
 			}
@@ -79,12 +80,12 @@ internal class MenuCrud
 
 				if (choice == "0")
 				{
-                    DisplayColourMessage("Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
+                    ConsoleHelper.DisplayColourMessage("Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
                     Environment.Exit(0);
 				}
 				else if (choice != "1")
 				{
-                    DisplayColourMessage("Felaktigt val. Programmet avslutas.", ConsoleColor.Red);
+                    ConsoleHelper.DisplayColourMessage("Felaktigt val. Programmet avslutas.", ConsoleColor.Red);
                     Environment.Exit(0);
 				}
 			}
@@ -93,32 +94,34 @@ internal class MenuCrud
 
 	private static void DisplayMenuHeader()
 	{
-        DisplayColourMessage("========================================", ConsoleColor.Green);
-        DisplayColourMessage("         Henriks Hobbylager MenuCrud        ", ConsoleColor.Green);
-        DisplayColourMessage("========================================", ConsoleColor.Green);
+        Console.ForegroundColor = ConsoleColor.Green;
+        ConsoleHelper.PrintCentered("========================================");
+        ConsoleHelper.PrintCentered("         Henriks Hobbylager MenuCrud        ");
+        ConsoleHelper.PrintCentered("========================================");
+        Console.ResetColor();
     }
 
     private async Task AddProduct()
 	{
-        var name = GetNonNullInput("Ange produktnamn: ");
+        var name = ConsoleHelper.GetNonNullInput("Ange produktnamn: ");
 
         Console.WriteLine("Ange pris:");
 		if (!decimal.TryParse(Console.ReadLine(), out var price))
 		{
-            DisplayColourMessage("Ogiltigt pris. Försök igen.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Ogiltigt pris. Försök igen.", ConsoleColor.Red);
             return;
 		}
 
 		Console.WriteLine("Ange lagerantal:");
 		if (!int.TryParse(Console.ReadLine(), out var stock))
 		{
-            DisplayColourMessage("Ogiltigt lagerantal. Försök igen.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Ogiltigt lagerantal. Försök igen.", ConsoleColor.Red);
             return;
 		}
 
 		// var product = new Product { Name = name, Price = price, Stock = stock };
 		await _currentFacade.CreateProductAsync(name, stock, price);
-        DisplayColourMessage("Produkten lades till.", ConsoleColor.Green);
+        ConsoleHelper.DisplayColourMessage("Produkten lades till.", ConsoleColor.Green);
     }
 
     private async Task UpdateProduct()
@@ -137,7 +140,7 @@ internal class MenuCrud
             Console.Write("Ange ID för produkten som ska uppdateras: ");
             if (!int.TryParse(Console.ReadLine(), out var id))
             {
-                DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
+                ConsoleHelper.DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
                 return;
             }
 
@@ -145,12 +148,12 @@ internal class MenuCrud
         }
         else if (searchOption == "2")
         {
-            var name = GetNonNullInput("Ange produktens namn: ");
+            var name = ConsoleHelper.GetNonNullInput("Ange produktens namn: ");
 
             var products = await _currentFacade.SearchProductsAsync(name);
             if (!products.Any())
             {
-                DisplayColourMessage("Ingen produkt hittades med det angivna namnet.", ConsoleColor.Red);
+                ConsoleHelper.DisplayColourMessage("Ingen produkt hittades med det angivna namnet.", ConsoleColor.Red);
                 return;
             }
 
@@ -167,7 +170,7 @@ internal class MenuCrud
                 Console.Write("Ange ID för produkten du vill uppdatera: ");
                 if (!int.TryParse(Console.ReadLine(), out var id))
                 {
-                    DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
+                    ConsoleHelper.DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
                     return;
                 }
 
@@ -180,13 +183,13 @@ internal class MenuCrud
         }
         else
         {
-            DisplayColourMessage("Ogiltigt alternativ. Försök igen.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Ogiltigt alternativ. Försök igen.", ConsoleColor.Red);
             return;
         }
 
         if (product == null)
         {
-            DisplayColourMessage("Produkten kunde inte hittas.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Produkten kunde inte hittas.", ConsoleColor.Red);
             return;
         }
 
@@ -202,7 +205,7 @@ internal class MenuCrud
         if (int.TryParse(Console.ReadLine(), out var newStock)) product.Stock = newStock;
 
         await _currentFacade.UpdateProductAsync(product);
-        DisplayColourMessage("Produkten har uppdaterats.", ConsoleColor.Green);
+        ConsoleHelper.DisplayColourMessage("Produkten har uppdaterats.", ConsoleColor.Green);
     }
 
     private async Task DeleteProduct()
@@ -210,24 +213,24 @@ internal class MenuCrud
 		Console.Write("Ange ID för produkten som ska tas bort: ");
 		if (!int.TryParse(Console.ReadLine(), out var id))
 		{
-            DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
 			return;
 		}
 
 		await _currentFacade.DeleteProductAsync(id);
-        DisplayColourMessage("Produkten har tagits bort.", ConsoleColor.Green);
+        ConsoleHelper.DisplayColourMessage("Produkten har tagits bort.", ConsoleColor.Green);
     }
 
     private async Task SearchProducts()
     {
-        var searchTerm = GetNonNullInput("Ange sökterm: ");
+        var searchTerm = ConsoleHelper.GetNonNullInput("Ange sökterm: ");
         var products = await _currentFacade.SearchProductsAsync(searchTerm);
 
         if (products.Any())
         {
-            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
-            DisplayColourMessage("            SÖKRESULTAT                 ", ConsoleColor.Cyan);
-            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("            SÖKRESULTAT                 ", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
 
             Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
             Console.WriteLine(new string('-', 50));
@@ -241,11 +244,11 @@ internal class MenuCrud
                     product.Stock);
             }
 
-            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
         }
         else
         {
-            DisplayColourMessage("Inga produkter hittades.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Inga produkter hittades.", ConsoleColor.Red);
         }
     }
 
@@ -255,9 +258,9 @@ internal class MenuCrud
 
 		if (products.Any())
 		{
-            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
-            DisplayColourMessage("            PRODUKTKATALOG              ", ConsoleColor.Cyan);
-            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("            PRODUKTKATALOG              ", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
 
             Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10}", "ID", "Namn", "Pris", "Lager");
 			Console.WriteLine(new string('-', 50));
@@ -271,32 +274,12 @@ internal class MenuCrud
 								  product.Stock);
 			}
 
-            DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
 
         }
         else
 		{
-            DisplayColourMessage("Inga produkter hittades.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Inga produkter hittades.", ConsoleColor.Red);
         }
-    }
-
-    private static string GetNonNullInput(string prompt)
-    {
-        Console.Write(prompt);
-		var input = Console.ReadLine();
-		while (string.IsNullOrWhiteSpace(input))
-		{
-            DisplayColourMessage("Fältet får inte vara tomt. Försök igen.", ConsoleColor.Red);
-            Console.Write(prompt);
-            input = Console.ReadLine();
-        }
-		return input;
-    }
-
-	private static void DisplayColourMessage(string message, ConsoleColor colour)
-    {
-        Console.ForegroundColor = colour;
-        Console.WriteLine(message);
-        Console.ResetColor();
     }
 }

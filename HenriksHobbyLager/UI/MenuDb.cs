@@ -1,5 +1,6 @@
 using HenriksHobbylager.UI;
 using HenriksHobbylager.Interface;
+using HenriksHobbyLager.UI;
 
 namespace HenriksHobbylager;
 
@@ -16,17 +17,13 @@ internal class MenuDb
 	public async Task ShowMainMenuAsync()
 	{
 		Console.Clear();
-		Console.ForegroundColor = ConsoleColor.Green;
-		PrintCentered("========================================");
-		PrintCentered("       🎉 Henriks Hobbylager 🎉        ");
-		PrintCentered("========================================");
-		Console.ResetColor();
+        ConsoleHelper.DisplayColourMessage("========================================", ConsoleColor.Green);
+        ConsoleHelper.DisplayColourMessage("       🎉 Henriks Hobbylager 🎉        ", ConsoleColor.Green);
+        ConsoleHelper.DisplayColourMessage("========================================", ConsoleColor.Green);
 
-		Console.WriteLine();
-		Console.ForegroundColor = ConsoleColor.Yellow;
-		Console.WriteLine("Vad vill du göra idag?");
-		Console.WriteLine("----------------------------------------");
-		Console.ResetColor();
+        Console.WriteLine();
+        ConsoleHelper.DisplayColourMessage("Vad vill du göra idag?", ConsoleColor.Yellow);
+        Console.WriteLine("----------------------------------------");
 
 		Console.WriteLine("[1] 📂 SQLite");
 		Console.WriteLine("[2] 🌐 MongoDB");
@@ -40,36 +37,28 @@ internal class MenuDb
 		{
 			case "1":
 				Console.Clear();
-				Console.WriteLine("🔧 Öppnar SQLite...");
-				await Task.Delay(1000); // Simulating that something is loading
+				ConsoleHelper.DisplayColourMessage("🔧 Öppnar SQLite...", ConsoleColor.Cyan);
+                await Task.Delay(1000); // Simulating that something is loading
 				var menuSQLite = new MenuCrud(_sqliteFacade, _sqliteFacade, _mongoFacade);
 				await menuSQLite.ShowMenu();
 				break;
 			case "2":
 				Console.Clear();
-				Console.WriteLine("🌐 Öppnar MongoDB...");
-				await Task.Delay(1000);
+				ConsoleHelper.DisplayColourMessage("🌐 Öppnar MongoDB...", ConsoleColor.Cyan);
+                await Task.Delay(1000);
 				var menuMongo = new MenuCrud(_mongoFacade, _sqliteFacade, _mongoFacade);
 				await menuMongo.ShowMenu();
 				break;
 			case "0":
-				Console.WriteLine("❌ Avslutar programmet. Tack för att du använde Henriks Hobbylager!");
+				ConsoleHelper.DisplayColourMessage("❌ Avslutar programmet. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
 				Console.ReadKey();
 				Environment.Exit(0);
 				break;
 			default:
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine("❌ Felaktigt val. Försök igen.");
+				ConsoleHelper.DisplayColourMessage("❌ Felaktigt val. Försök igen.", ConsoleColor.Red);
 				Console.ResetColor();
 				break;
 		}
-	}
-
-	private void PrintCentered(string text)
-	{
-		int windowWidth = Console.WindowWidth;
-		int textPadding = (windowWidth - text.Length) / 2;
-		Console.WriteLine(new string(' ', textPadding) + text);
 	}
 }
 
