@@ -49,15 +49,18 @@ namespace HenriksHobbylager.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Product>().ToTable("Products");
-
+            modelBuilder.Entity<Product>().HasKey(p => p.Id);
+            modelBuilder.Entity<Product>().Property(p => p.Id).IsRequired().ValueGeneratedOnAdd();
             modelBuilder.Entity<Product>()
                 .HasIndex(p => p.Name)
-                .HasDatabaseName("IX_Products_Name");
+                .HasDatabaseName("IX_Products_Name").IsUnique();
+            
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Product)
                 .WithMany()
                 .HasForeignKey(oi => oi.ProductId);
+                
 
             modelBuilder.Entity<OrderItem>()
                 .HasOne(oi => oi.Order)

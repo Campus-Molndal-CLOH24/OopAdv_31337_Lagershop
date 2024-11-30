@@ -1,4 +1,5 @@
-﻿using HenriksHobbylager.Models;
+﻿
+using HenriksHobbylager.Models;
 using MongoDB.Driver;
 
 namespace HenriksHobbylager.Data;
@@ -37,4 +38,5 @@ public class MongoDbContext
     public IMongoCollection<Product> Products =>
         Database.GetCollection<Product>("Products");
 }
+
 

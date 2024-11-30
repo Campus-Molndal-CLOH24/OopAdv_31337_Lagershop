@@ -34,7 +34,7 @@ public class SQLiteRepository : IRepository<Product>
         return await _dbSet.Where(predicate).ToListAsync();
     }
 
-    public async Task<Product?> GetByIdAsync(int id)
+    public async Task<Product?> GetByIdAsync(string? id)
     {
         return await _dbSet.FindAsync(id);
     }
@@ -46,7 +46,7 @@ public class SQLiteRepository : IRepository<Product>
         await _context.SaveChangesAsync();
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(string id)
     {
         var entity = await _dbSet.FindAsync(id);
         if (entity != null)
