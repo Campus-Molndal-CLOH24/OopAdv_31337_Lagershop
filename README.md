@@ -28,7 +28,7 @@ git clone https://github.com/Campus-Molndal-CLOH24/OopAdv_31337_Lagershop.git
 - Programmet följer kundens krav-spec i form av att vara en konsollapplikation
 - Det finns två huvudmenyer som kunden kan arbeta i: Vid startup väljer kunden vilken databas hen vill arbeta i, sedan följs det av en meny som hanterar grundläggande CRUD-funktioner
 - Vissa val har flera funktioner i ett. Exempelvis "Uppdatera en produkt" startar med en enklare val: sök efter produkt-id eller fri namn? Söker användaren efter produktnamn så återanvänds samma kod som används i "Sök igenom produkterna".
-- På så vis är programmet intuitivt, bara två egentliga menyer, men ändå finns mer komplexa tekniska och användarfunktioner
+- På så vis är programmet intuitivt, bara två egentliga menyer, men ändå finns mer komplexa tekniska lösningar och användarfunktioner.
 
 ## Eventuella konfigurationsinställningar
 
@@ -227,6 +227,62 @@ public class MenuDb
 - Olika affärsområden har brutits ut i separata element: ProductFacade, våra Repositories, etc.
 - Vinsten med arbeta modulärt och bryta ut koden i separata moduler är inte bara för att göra koden mer läsbar, den är även lättare att utvecklas, tas bort, testas, och underlättare även om vi vill återanvända kod.
 - Vill bara notera skillnaden mellan SRP i SOLID-principen jämfört med SoC: Båda delar upp kodansvar, men SRP har fokus på en enskild klass eller modul medans SoC handlar om hela applikations-strukturen.
+
+#### 9. Kunden skall kunna stänga av programmet utan att förlora data
+
+Vi har tre primära säkerhetsfunktioner på plats för att förhindra dataförlust eller korrupt data:
+  
+1. Dels lagras data i en databas nu, applikationen är fristående och datan lagras inte i denna applikation. Det går utmärkt att stänga av den och datan lagras i databasens minne.
+  
+2. Dels använder vi async för att säkerställa att operationer genomförst i rätt ordning; vi kan ta ett exempel med där en produkt läggs till:
+```cs
+public async Task AddAsync(Product entity)
+{
+    if (!await _dbSet.AnyAsync(p => p.Name == entity.Name))
+    {
+        await _dbSet.AddAsync(entity); // Async operation säkerställer att tillägget inte avbryts mitt i processen
+        await _context.SaveChangesAsync(); // Ändringarna sparas först efter att allt är korrekt genomfört
+    }
+    else
+    {
+        Console.WriteLine("Produkten finns redan i databasen.");
+    }
+}
+```
+Vad som händer ovan: Notera hur varje 'Async' avslutas med en 'await'. Det betyder helt enkelt att koden väntar vid await tills processen ovan har genomförts. I det här kodexemplet så sparas inte datan genom SaveChangesAsync förrän stegen innan genomförts. 
+   
+3. Transaktioner är en annan teknisk lösning för att säkerställa dataintegritet och atomicitet, de är lite svårare att illustrera i kod, vi utvecklar nedan:
+```cs
+public async Task UpdateProductAsync(Product product)
+{
+    using var transaction = await _context.Database.BeginTransactionAsync(); // Börja transaktion
+    try
+    {
+        var existingProduct = await _repository.GetByIdAsync(product.Id);
+        if (existingProduct == null)
+        {
+            throw new InvalidOperationException("Produkten kunde inte hittas.");
+        }
+
+        existingProduct.Name = product.Name;
+        existingProduct.Price = product.Price;
+        existingProduct.Stock = product.Stock;
+
+        _context.Products.Update(existingProduct); // Uppdatera produkten
+        await _context.SaveChangesAsync(); // Förbered att spara ändringen
+
+        await transaction.CommitAsync(); // Spara ändringen först när allt är korrekt
+    }
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync(); // Återställ ändringar vid fel
+        Console.WriteLine($"Ett fel inträffade: {ex.Message}");
+    }
+}
+```
+Vad som händer ovan: Vi ser att SaveChangesAsync förbereder för att spara uppdateringen, men CommitAsync kör inte förrän stegen innan är kompletta. Transaction är en utmärkt lösning när vi kör flera steg efter varandra där hela kedjan är beroende av varandra.  
+  
+I detta fall, vad hade hänt om vi kört Update -> Save Changes, sedan Commit -> Save Changes, men tappat anslutning mellan Update->Save och Commit->Save? Vi hade kunnat uppdatera en beställning, men den hade inte Commitat. När vi startar om hade vi antingen helt saknat Commit-steget eller så hade hela processen startat om med en uppdatering av en uppdatering. Oerhört allvarligt! Transaction skyddar applikationen.
   
 ## Kort beskrivning av databasstrukturen
 
