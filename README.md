@@ -129,11 +129,11 @@ protected override void OnModelCreating(ModelBuilder modelBuilder)
 }
 ```
 
-#### 6. Dependency Injection (DI)  
-- Vi använder oss av DI. Det betyder helt enkelt att vi parametriserar värden istället för att hårdkoda dem. Vi kan till exempel skicka SQL-kod som strängar.
-- Det gör kodtrafik mer säker och även lättare att lägga templates för att köra mellan olika databassystem (dock har det inte stöd för MongoDB, men däremot SQL-Molntjänster om kunden väljer att utveckla dit i framtiden).
-- DI-verktyg ingår i Entity Framework, oerhört praktiskt när vi redan kör EF.
-- Rent praktiskt går det till genom att klasser tar emot sina beroenden genom konstruktorer. Kodexempel nedan:
+#### 6. Dependency Injection (DI)? Nja. Inversion of Control (IoC)!  
+- Vi använder oss av IoC för att separera beroenden från implementationerna. Det innebär att vi explicit tillhandahåller beroenden genom att skicka in instanser till klasser som behöver dem, istället för att hårdkoda dem i klasserna själva.
+- IoC förbättrar testbarhet, modularitet och minskar beroenden mellan klasser.
+- Om vi i framtiden skulle använda en DI-container, skulle vi kunna automatisera den här hanteringen för ytterligare effektivitet.
+- Rent praktiskt gör vi detta genom att skicka beroenden via konstruktorer. Kodexempel:
 ```cs
 public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProductFacade mongoFacade)
 {
@@ -142,6 +142,12 @@ public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProd
     this.mongoFacade = mongoFacade ?? throw new ArgumentNullException(nameof(mongoFacade));
 }
 ```
+- Vad saknas för att detta skulle bli DI rent specifikt (mer än att fungera ungefär som DI)? Vi hade behövt använda en DI-container (t ex Microsoft.Extensions.DependencyInjection) och låta den ansvara för att skapa och injicera instanser. Vi hade inte specifikt behövt skapa new MenuDB, DI-containern hade automatiskt gjort det när vi begär MenuDB i koden. Kodexempel:
+```cs
+services.AddScoped<IProductFacade, ProductFacade>();
+services.AddScoped<MenuDb>();
+```
+- Niklas skrev en dokumentation om DI initialt för han trodde att det räckte med parametriserad injektion för att det skall vara DI, men Megan pekade (rätt!) ut att det var IoC, inte DI. Niklas har korrigerat denna dokumentation i efterhand. Vi hade säkert tittat på att implementera detta om vi inte hade hittat det i sista timmen. Bra läxa - snyggt Megan!
 
 #### 7. SOLID-principen och denna applikation
 
