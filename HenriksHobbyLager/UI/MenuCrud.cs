@@ -143,11 +143,7 @@ internal class MenuCrud
 		if (searchOption == "1")
 		{
 			Console.Write("Ange ID för produkten som ska uppdateras: ");
-			if (!int.TryParse(Console.ReadLine(), out var id))
-			{
-				ConsoleHelper.DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
-				return;
-			}
+			var id = ConsoleHelper.GetNonNullInput("Ange produktens id: ");
 
 			product = await _currentFacade.GetProductByIdAsync(id);
 		}
@@ -173,12 +169,8 @@ internal class MenuCrud
 
 				Console.ResetColor();
 
-				Console.Write("Ange ID för produkten du vill uppdatera: ");
-				if (!int.TryParse(Console.ReadLine(), out var id))
-				{
-					ConsoleHelper.DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
-					return;
-				}
+				
+				var id = ConsoleHelper.GetNonNullInput("Ange id för produkten som ska uppdateras: ");
 
 				product = await _currentFacade.GetProductByIdAsync(id);
 			}
@@ -222,12 +214,8 @@ internal class MenuCrud
 
 	private async Task DeleteProduct()
 	{
-		Console.Write("Ange ID för produkten som ska tas bort: ");
-		if (!int.TryParse(Console.ReadLine(), out var id))
-		{
-			ConsoleHelper.DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
-			return;
-		}
+		
+		var id = ConsoleHelper.GetNonNullInput("Ange id för produkten som ska tas bort: ");
 
 		await _currentFacade.DeleteProductAsync(id);
 		ConsoleHelper.DisplayColourMessage("Produkten har tagits bort.", ConsoleColor.Green);

@@ -31,7 +31,7 @@ public class MongoRepository : IRepository<Product>
         return await _collection.Find(predicate).ToListAsync();
     }
 
-    public async Task<Product?> GetByIdAsync(int id)
+    public async Task<Product?> GetByIdAsync(string id)
     {
         return await _collection.Find(p => p.Id == id).FirstOrDefaultAsync();
     }
@@ -45,7 +45,7 @@ public class MongoRepository : IRepository<Product>
         }
     }
 
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(string id)
     {
         var result = await _collection.DeleteOneAsync(p => p.Id == id);
         if (result.DeletedCount == 0)

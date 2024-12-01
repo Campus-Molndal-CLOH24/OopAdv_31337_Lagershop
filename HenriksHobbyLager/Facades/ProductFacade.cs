@@ -29,7 +29,7 @@ internal class ProductFacade : IProductFacade
         await _repository.AddAsync(product);
     }
 
-    public async Task DeleteProductAsync(int productId)
+    public async Task DeleteProductAsync(string productId)
     {
         var product = await _repository.GetByIdAsync(productId);
         if (product == null) throw new ArgumentException($"Produkten med ID {productId} hittades ej.");
@@ -71,7 +71,7 @@ internal class ProductFacade : IProductFacade
         return await _repository.GetAllAsync(p => true);
     }
 
-    public async Task<Product?> GetProductByIdAsync(int productId)
+    public async Task<Product?> GetProductByIdAsync(string productId)
     {
         return await _repository.GetByIdAsync(productId);
     }
