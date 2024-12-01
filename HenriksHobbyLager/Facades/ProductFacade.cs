@@ -1,4 +1,4 @@
-﻿using HenriksHobbylager.Facades;
+﻿using HenriksHobbylager.Interface;
 using HenriksHobbylager.Models;
 using HenriksHobbylager.Repositories;
 
@@ -6,69 +6,73 @@ namespace HenriksHobbyLager.Facades;
 
 internal class ProductFacade : IProductFacade
 {
-    private readonly IRepository<Product> _sqliteRepository;
-    private readonly IRepository<Product> _mongoRepository;
+    private readonly IRepository<Product> _repository;
+    public string DatabaseType { get; }
 
-    private readonly bool _useMongo;
-    
-    public ProductFacade(IRepository<Product> sqliteRepository, IRepository<Product> mongoRepository, bool useMongo)
+    public ProductFacade(IRepository<Product> repository)
     {
-        _sqliteRepository = sqliteRepository;
-        _mongoRepository = mongoRepository;
-        _useMongo = useMongo;
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+        DatabaseType = repository is SQLiteRepository ? "SQLite" :
+               repository is MongoRepository ? "MongoDB" : "Okänd"; // We added "okänd" to handle unknown database types
     }
 
-    private IRepository<Product> Repository => _useMongo ? _mongoRepository : _sqliteRepository;
-    
-    public async Task CreateProductAsync(string productName, int productStock, decimal productPrice)
+    public async Task CreateProductAsync(string productName, int productStock, decimal productPrice, string category)
     {
         var product = new Product
         {
             Name = productName,
             Stock = productStock,
             Price = productPrice,
-            Created = DateTime.Now,
-            LastUpdated = DateTime.Now
+            Category = category
         };
-        await Repository.AddAsync(product);
+
+        await _repository.AddAsync(product);
     }
 
-    public async Task DeleteProductAsync(int productId)
+    public async Task DeleteProductAsync(string productId)
     {
-        var product = await Repository.GetByIdAsync(productId);
-        if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
-        await Repository.DeleteAsync(productId);
+        var product = await _repository.GetByIdAsync(productId);
+        if (product == null) throw new ArgumentException($"Produkten med ID {productId} hittades ej.");
+
+        await _repository.DeleteAsync(productId);
     }
 
-    public async Task UpdateProductAsync(int productId, string productName, int productQuantity, decimal productPrice)
+    public async Task UpdateProductAsync(Product product)
     {
-        var product = await Repository.GetByIdAsync(productId);
-        if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
-        
-        product.Name = productName;
-        product.Stock = productQuantity;
-        product.Price = productPrice;
-        product.LastUpdated = DateTime.Now;
+        var existingProduct = await _repository.GetByIdAsync(product.Id);
+        if (existingProduct == null)
+        {
+            throw new InvalidOperationException("Produkten kunde inte hittas.");
+        }
 
-        await Repository.UpdateAsync(product);
-    }
+        existingProduct.Name = product.Name;
+        existingProduct.Price = product.Price;
+        existingProduct.Stock = product.Stock;
 
-    public async Task<Product> SearchProductAsync(int productId)
-    {
-        var product = await Repository.GetByIdAsync(productId);
-        if (product == null) throw new ArgumentException($"Product with ID {productId} not found.");
-        return product;
+        await _repository.UpdateAsync(existingProduct);
     }
 
     public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
     {
-        return await Repository.GetAllAsync(p =>
-            p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-            p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            throw new ArgumentException("Söktermen kan inte vara null eller tom.", nameof(searchTerm));
+        }
+
+        var lowerSearchTerm = searchTerm.ToLower();
+
+        return await _repository.SearchAsync(p =>
+            p.Name.ToLower().Contains(lowerSearchTerm) ||
+            (p.Category != null && p.Category.ToLower().Contains(lowerSearchTerm))); // Category can be null
     }
 
     public async Task<IEnumerable<Product>> GetAllProductsAsync()
     {
-        return await Repository.GetAllAsync(p => true);
+        return await _repository.GetAllAsync(p => true);
+    }
+
+    public async Task<Product?> GetProductByIdAsync(string productId)
+    {
+        return await _repository.GetByIdAsync(productId);
     }
 }
