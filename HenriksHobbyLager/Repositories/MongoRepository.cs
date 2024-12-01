@@ -12,7 +12,7 @@ public class MongoRepository : IRepository<Product>
     {
         _collection = context.Products;
     }
-    
+
     public async Task AddAsync(Product entity)
     {
         var existingProduct = await _collection.Find(p => p.Name == entity.Name).FirstOrDefaultAsync();
@@ -25,23 +25,17 @@ public class MongoRepository : IRepository<Product>
             Console.WriteLine("Produkten finns redan i databasen.");
         }
     }
-    
-    public async Task<IEnumerable<Product>> GetAllAsync()
+
+    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
     {
-        return await _collection.Find(_ => true).ToListAsync(); 
+        return await _collection.Find(predicate).ToListAsync();
     }
-    
-    public async Task<Product?> GetByIdAsync(int id)
+
+    public async Task<Product?> GetByIdAsync(string id)
     {
         return await _collection.Find(p => p.Id == id).FirstOrDefaultAsync();
     }
-    
-    public async Task<IEnumerable<Product>> GetAllAsync(Func<Product, bool> predicate)
-    {
-        var allProducts = await _collection.Find(_ => true).ToListAsync();
-        return allProducts.Where(predicate);
-    }
-    
+
     public async Task UpdateAsync(Product entity)
     {
         var result = await _collection.ReplaceOneAsync(p => p.Id == entity.Id, entity);
@@ -50,8 +44,8 @@ public class MongoRepository : IRepository<Product>
             Console.WriteLine("Produkten kunde inte uppdateras eftersom den inte hittades.");
         }
     }
-    
-    public async Task DeleteAsync(int id)
+
+    public async Task DeleteAsync(string id)
     {
         var result = await _collection.DeleteOneAsync(p => p.Id == id);
         if (result.DeletedCount == 0)
@@ -59,24 +53,20 @@ public class MongoRepository : IRepository<Product>
             Console.WriteLine("Produkten kunde inte tas bort eftersom den inte hittades.");
         }
     }
-    
+
+    public async Task DeleteAsync(Product entity)
+    {
+        await _collection.DeleteOneAsync(p => p.Id == entity.Id);
+    }
+
     public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
     {
         return await _collection.Find(predicate).ToListAsync();
     }
-    
-    public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
-    {
-        return await _collection.Find(predicate).ToListAsync();
-    }
-    
+
+    // No-op for MongoDB since changes are saved immediately. We keep this for now though since it's part of the interface.
     public Task SaveChangesAsync()
     {
         return Task.CompletedTask;
-    }
-    
-    public async Task DeleteAsync(Product entity)
-    {
-        await _collection.DeleteOneAsync(p => p.Id == entity.Id);
     }
 }

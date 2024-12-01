@@ -1,13 +1,15 @@
 ﻿using HenriksHobbylager.Models;
 
-namespace HenriksHobbylager.Facades;
+namespace HenriksHobbylager.Interface;
 
 internal interface IProductFacade
 {
-    Task CreateProductAsync(string productName, int productQuantity, decimal productPrice); 
-    Task DeleteProductAsync(int productId);
-    Task UpdateProductAsync(int productId, string productName, int productQuantity, decimal productPrice); 
-    Task<Product> SearchProductAsync(int productId); 
+    string DatabaseType { get; }
+    Task CreateProductAsync(string productName, int productQuantity, decimal productPrice, string category);
+    Task DeleteProductAsync(string productId);
+    Task UpdateProductAsync(Product product);
+    Task<Product?> GetProductByIdAsync(string productId);
     Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm);
-    Task<IEnumerable<Product>> GetAllProductsAsync(); 
+    Task<IEnumerable<Product>> GetAllProductsAsync();
+
 }
