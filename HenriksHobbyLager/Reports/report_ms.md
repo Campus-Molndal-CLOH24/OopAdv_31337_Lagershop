@@ -50,4 +50,4 @@ Jag hann tyvärr inte lösa detta problem men jag vet hur jag hade löst de i fr
 ## Vad skulle du göra annorlunda nästa gång?
 Vi skulle varit mer noggranna med att göra uppgifterna i mindre delar och också se till att de som va beroende av varandra inte delades ut samtidigt, så bättre planerat arbete.
 Vi skulle också haft en lite bättre plan kring hur vi ville strukturera upp allt, fler personer = fler ideer och tankesätt. Så hade underlättat om vi alla pratade ihop oss lite mer i början.
-Vi skulle också använda oss mera utav PR approves för att se till att vi inte skriver om varandras fungerade kod. Men detta lärde vi oss senare.
+Vi skulle också använda oss mera utav PR approves  för att se till att vi inte skriver om varandras fungerade kod. Men detta lärde vi oss senare.
