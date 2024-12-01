@@ -212,16 +212,31 @@ internal class MenuCrud
 		ConsoleHelper.DisplayColourMessage("Produkten har uppdaterats.", ConsoleColor.Green);
 	}
 
-	private async Task DeleteProduct()
-	{
-		
-		var id = ConsoleHelper.GetNonNullInput("Ange id för produkten som ska tas bort: ");
+    private async Task DeleteProduct()
+    {
+        Console.Write("Ange ID för produkten som ska tas bort: ");
+        if (!int.TryParse(Console.ReadLine(), out var id))
+        {
+            ConsoleHelper.DisplayColourMessage("Ogiltigt ID. Försök igen.", ConsoleColor.Red);
+            return;
+        }
 
-		await _currentFacade.DeleteProductAsync(id);
-		ConsoleHelper.DisplayColourMessage("Produkten har tagits bort.", ConsoleColor.Green);
-	}
+        try
+        {
+            await _currentFacade.DeleteProductAsync(id.ToString());
+            ConsoleHelper.DisplayColourMessage("Produkten har tagits bort.", ConsoleColor.Green);
+        }
+        catch (ArgumentException ex)
+        {
+            ConsoleHelper.DisplayColourMessage(ex.Message, ConsoleColor.Red);
+        }
+        catch (Exception ex)
+        {
+            ConsoleHelper.DisplayColourMessage($"Ett oväntat fel inträffade: {ex.Message}", ConsoleColor.Red);
+        }
+    }
 
-	private async Task SearchProducts()
+    private async Task SearchProducts()
 	{
 		var searchTerm = ConsoleHelper.GetNonNullInput("Ange sökterm: ");
 		var products = await _currentFacade.SearchProductsAsync(searchTerm);
