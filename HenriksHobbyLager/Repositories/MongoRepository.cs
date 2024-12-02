@@ -17,11 +17,13 @@ public class MongoRepository : IRepository<Product>
 
     public async Task AddAsync(Product entity)
     {
+        // Sätt MongoDB `_id` om det saknas
         if (string.IsNullOrEmpty(entity._id))
         {
             entity._id = ObjectId.GenerateNewId().ToString();
         }
 
+        // Sätt `Id` för kompatibilitet med andra delar av applikationen
         if (entity.Id == 0)
         {
             entity.Id = ObjectId.Parse(entity._id).GetHashCode();
@@ -32,12 +34,19 @@ public class MongoRepository : IRepository<Product>
 
     public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
     {
+        // Returnera alla produkter som matchar predicate
         return await _collection.Find(predicate).ToListAsync();
     }
 
     public async Task<Product?> GetByIdAsync(string id)
     {
-        return await _collection.Find(p => p._id == id).FirstOrDefaultAsync();
+        // Försök hitta med både `_id` och `Id`
+        var product = await _collection.Find(p => p._id == id).FirstOrDefaultAsync();
+        if (product == null && int.TryParse(id, out var intId))
+        {
+            product = await _collection.Find(p => p.Id == intId).FirstOrDefaultAsync();
+        }
+        return product;
     }
 
     public async Task UpdateAsync(Product entity)
@@ -57,7 +66,15 @@ public class MongoRepository : IRepository<Product>
 
     public async Task DeleteAsync(string id)
     {
+        // Försök radera med `_id`
         var result = await _collection.DeleteOneAsync(p => p._id == id);
+
+        // Om inget raderades, försök med `Id` om det är numeriskt
+        if (result.DeletedCount == 0 && int.TryParse(id, out var intId))
+        {
+            result = await _collection.DeleteOneAsync(p => p.Id == intId);
+        }
+
         if (result.DeletedCount == 0)
         {
             Console.WriteLine("Produkten kunde inte tas bort eftersom den inte hittades.");
@@ -77,11 +94,13 @@ public class MongoRepository : IRepository<Product>
 
     public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
     {
+        // Sök med hjälp av predicate
         return await _collection.Find(predicate).ToListAsync();
     }
 
     public Task SaveChangesAsync()
     {
-        return Task.CompletedTask; // MongoDB sparar direkt
+        // MongoDB sparar direkt
+        return Task.CompletedTask;
     }
 }

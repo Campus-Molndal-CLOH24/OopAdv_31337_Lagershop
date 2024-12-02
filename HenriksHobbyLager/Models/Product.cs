@@ -24,4 +24,8 @@ public class Product
     public string Category { get; set; } = string.Empty;
     public DateTime Created { get; set; } = DateTime.Now;
     public DateTime? LastUpdated { get; set; }
+    
+    // DisplayId: Returnerar _id om det finns
+    [NotMapped]
+    public string DisplayId => _id ?? Id.ToString();
 }
