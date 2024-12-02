@@ -206,7 +206,7 @@ internal class MenuCrud
             foreach (var product in products)
             {
                 Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10:C} | {4, -10}",
-                    product.Id,
+                    product.DisplayId,  // Använder DisplayId
                     product.Name,
                     product.Category,
                     product.Price,
