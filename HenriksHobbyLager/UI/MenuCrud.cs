@@ -1,5 +1,5 @@
-using HenriksHobbylager.Models;
 using HenriksHobbylager.Interface;
+using HenriksHobbylager.Models;
 using HenriksHobbyLager.UI;
 
 namespace HenriksHobbylager.UI;
@@ -7,37 +7,40 @@ namespace HenriksHobbylager.UI;
 internal class MenuCrud
 {
     private readonly IProductFacade _currentFacade;
-    private readonly IProductFacade _sqliteFacade;
     private readonly IProductFacade? _mongoFacade;
+    private readonly IProductFacade _sqliteFacade;
 
     public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProductFacade? mongoFacade)
     {
-        _currentFacade = currentFacade ?? throw new ArgumentNullException(nameof(currentFacade), "CurrentFacade är null.");
+        _currentFacade = currentFacade ??
+                         throw new ArgumentNullException(nameof(currentFacade), "CurrentFacade är null.");
         _sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade), "SQLiteFacade är null.");
         _mongoFacade = mongoFacade;
     }
 
     internal async Task ShowMenu()
     {
-        bool keepRunning = true;
+        var keepRunning = true;
 
         while (keepRunning)
+
+
+            Console.Clear();
+        DisplayMenuHeader();
+        Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
+        Console.WriteLine("1. Lägg till en produkt");
+        Console.WriteLine("2. Ta bort en produkt");
+        Console.WriteLine("3. Uppdatera en produkt");
+        Console.WriteLine("4. Sök igenom produkterna");
+        Console.WriteLine("5. Visa alla produkterna");
+        Console.WriteLine("6. Gå tillbaka till databasmenyn");
+        Console.WriteLine("0. Avsluta");
+        Console.Write("\nVälj ett alternativ: ");
+
+        var menuOption = Console.ReadLine();
+        Console.Clear();
+        try
         {
-            Console.Clear();
-            DisplayMenuHeader();
-            Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
-            Console.WriteLine("1. Lägg till en produkt");
-            Console.WriteLine("2. Ta bort en produkt");
-            Console.WriteLine("3. Uppdatera en produkt");
-            Console.WriteLine("4. Sök igenom produkterna");
-            Console.WriteLine("5. Visa alla produkterna");
-            Console.WriteLine("6. Gå tillbaka till databasmenyn");
-            Console.WriteLine("0. Avsluta");
-            Console.Write("\nVälj ett alternativ: ");
-
-            var menuOption = Console.ReadLine();
-            Console.Clear();
-
             switch (menuOption)
             {
                 case "1":
@@ -70,26 +73,30 @@ internal class MenuCrud
                     Console.ResetColor();
                     break;
             }
+        }
+        catch (Exception ex)
+        {
+            ConsoleHelper.DisplayColourMessage($"Ett oväntat fel inträffade: {ex.Message}", ConsoleColor.Red);
+        }
 
-            if (keepRunning)
+        if (keepRunning)
+        {
+            Console.WriteLine("\nVill du visa menyn igen eller avsluta?");
+            Console.WriteLine("1. Visa menyn igen");
+            Console.WriteLine("0. Avsluta");
+            Console.Write("\nVälj ett alternativ: ");
+            var choice = Console.ReadLine();
+
+            if (choice == "0")
             {
-                Console.WriteLine("\nVill du visa menyn igen eller avsluta?");
-                Console.WriteLine("1. Visa menyn igen");
-                Console.WriteLine("0. Avsluta");
-                Console.Write("\nVälj ett alternativ: ");
-                var choice = Console.ReadLine();
-
-                if (choice == "0")
-                {
-                    ConsoleHelper.DisplayColourMessage(
-                        "Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
-                    Environment.Exit(0);
-                }
-                else if (choice != "1")
-                {
-                    ConsoleHelper.DisplayColourMessage("Felaktigt val. Programmet avslutas.", ConsoleColor.Red);
-                    Environment.Exit(0);
-                }
+                ConsoleHelper.DisplayColourMessage(
+                    "Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
+                Environment.Exit(0);
+            }
+            else if (choice != "1")
+            {
+                ConsoleHelper.DisplayColourMessage("Felaktigt val. Programmet avslutas.", ConsoleColor.Red);
+                Environment.Exit(0);
             }
         }
     }
@@ -204,14 +211,12 @@ internal class MenuCrud
             Console.WriteLine(new string('-', 50));
 
             foreach (var product in products)
-            {
                 Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10:C} | {4, -10}",
-                    product.DisplayId,  // Använder DisplayId
+                    product.DisplayId, // Använder DisplayId
                     product.Name,
                     product.Category,
                     product.Price,
                     product.Stock);
-            }
 
             ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
         }
