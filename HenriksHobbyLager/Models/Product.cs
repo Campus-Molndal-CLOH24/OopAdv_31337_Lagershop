@@ -8,9 +8,9 @@ namespace HenriksHobbylager.Models;
 public class Product
 {
     [Key]
-    [BsonId]
+    /* [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)] */
     public string? Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
