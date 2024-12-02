@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace HenriksHobbyLager.Migrations.SQLiteDb
+namespace HenriksHobbyLager.Migrations
 {
     /// <inheritdoc />
-    public partial class AddOrderAndOrderItemTables : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -53,9 +53,7 @@ namespace HenriksHobbyLager.Migrations.SQLiteDb
                     SubTotal = table.Column<decimal>(type: "TEXT", nullable: false),
                     TotalPrice = table.Column<decimal>(type: "TEXT", nullable: false),
                     ProductId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProductId1 = table.Column<int>(type: "INTEGER", nullable: false),
-                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
-                    OrderId1 = table.Column<int>(type: "INTEGER", nullable: false)
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,20 +65,8 @@ namespace HenriksHobbyLager.Migrations.SQLiteDb
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderItems_Orders_OrderId1",
-                        column: x => x.OrderId1,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_OrderItems_Products_ProductId",
                         column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_OrderItems_Products_ProductId1",
-                        column: x => x.ProductId1,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -92,24 +78,15 @@ namespace HenriksHobbyLager.Migrations.SQLiteDb
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_OrderId1",
-                table: "OrderItems",
-                column: "OrderId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_ProductId",
                 table: "OrderItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItems_ProductId1",
-                table: "OrderItems",
-                column: "ProductId1");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Products_Name",
                 table: "Products",
-                column: "Name");
+                column: "Name",
+                unique: true);
         }
 
         /// <inheritdoc />
