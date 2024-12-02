@@ -1,9 +1,11 @@
 ﻿using System.Linq.Expressions;
-using HenriksHobbylager.Data;
+using HenriksHobbylager.Data.MongoDb;
 using HenriksHobbylager.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace HenriksHobbylager.Repositories;
+
 public class MongoRepository : IRepository<Product>
 {
     private readonly IMongoCollection<Product> _collection;
@@ -15,15 +17,17 @@ public class MongoRepository : IRepository<Product>
 
     public async Task AddAsync(Product entity)
     {
-        var existingProduct = await _collection.Find(p => p.Name == entity.Name).FirstOrDefaultAsync();
-        if (existingProduct == null)
+        if (string.IsNullOrEmpty(entity._id))
         {
-            await _collection.InsertOneAsync(entity);
+            entity._id = ObjectId.GenerateNewId().ToString();
         }
-        else
+
+        if (entity.Id == 0)
         {
-            Console.WriteLine("Produkten finns redan i databasen.");
+            entity.Id = ObjectId.Parse(entity._id).GetHashCode();
         }
+
+        await _collection.InsertOneAsync(entity);
     }
 
     public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
@@ -33,12 +37,18 @@ public class MongoRepository : IRepository<Product>
 
     public async Task<Product?> GetByIdAsync(string id)
     {
-        return await _collection.Find(p => p.Id == id).FirstOrDefaultAsync();
+        return await _collection.Find(p => p._id == id).FirstOrDefaultAsync();
     }
 
     public async Task UpdateAsync(Product entity)
     {
-        var result = await _collection.ReplaceOneAsync(p => p.Id == entity.Id, entity);
+        if (string.IsNullOrEmpty(entity._id))
+        {
+            Console.WriteLine("Produkten saknar ett giltigt _id för MongoDB och kan inte uppdateras.");
+            return;
+        }
+
+        var result = await _collection.ReplaceOneAsync(p => p._id == entity._id, entity);
         if (result.MatchedCount == 0)
         {
             Console.WriteLine("Produkten kunde inte uppdateras eftersom den inte hittades.");
@@ -47,7 +57,7 @@ public class MongoRepository : IRepository<Product>
 
     public async Task DeleteAsync(string id)
     {
-        var result = await _collection.DeleteOneAsync(p => p.Id == id);
+        var result = await _collection.DeleteOneAsync(p => p._id == id);
         if (result.DeletedCount == 0)
         {
             Console.WriteLine("Produkten kunde inte tas bort eftersom den inte hittades.");
@@ -56,7 +66,13 @@ public class MongoRepository : IRepository<Product>
 
     public async Task DeleteAsync(Product entity)
     {
-        await _collection.DeleteOneAsync(p => p.Id == entity.Id);
+        if (string.IsNullOrEmpty(entity._id))
+        {
+            Console.WriteLine("Produkten saknar ett giltigt _id för MongoDB och kan inte tas bort.");
+            return;
+        }
+
+        await _collection.DeleteOneAsync(p => p._id == entity._id);
     }
 
     public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
@@ -64,9 +80,8 @@ public class MongoRepository : IRepository<Product>
         return await _collection.Find(predicate).ToListAsync();
     }
 
-    // No-op for MongoDB since changes are saved immediately. We keep this for now though since it's part of the interface.
     public Task SaveChangesAsync()
     {
-        return Task.CompletedTask;
+        return Task.CompletedTask; // MongoDB sparar direkt
     }
 }

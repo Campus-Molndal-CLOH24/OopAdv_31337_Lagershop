@@ -20,7 +20,7 @@ public class SQLiteRepository : IRepository<Product>
     {
         if (!await _dbSet.AnyAsync(p => p.Name == entity.Name))
         {
-            await _dbSet.AddAsync(entity);
+            await _dbSet.AddAsync(entity); // SQLite kommer generera Id
             await _context.SaveChangesAsync();
         }
         else
@@ -34,11 +34,15 @@ public class SQLiteRepository : IRepository<Product>
         return await _dbSet.Where(predicate).ToListAsync();
     }
 
-    public async Task<Product?> GetByIdAsync(string? id)
+    public async Task<Product?> GetByIdAsync(string id)
     {
-        return await _dbSet.FindAsync(id);
+        if (int.TryParse(id, out var intId))
+        {
+            return await _dbSet.FindAsync(intId);
+        }
+        Console.WriteLine("Ogiltigt ID-format för SQLite.");
+        return null;
     }
-
 
     public async Task UpdateAsync(Product entity)
     {
@@ -48,17 +52,23 @@ public class SQLiteRepository : IRepository<Product>
 
     public async Task DeleteAsync(string id)
     {
-        var entity = await _dbSet.FindAsync(id);
-        if (entity != null)
+        if (int.TryParse(id, out var intId))
         {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
+            var entity = await _dbSet.FindAsync(intId);
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                Console.WriteLine("Produkten kunde inte hittas.");
+            }
         }
-    }
-
-    public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
-    {
-        return await _dbSet.Where(predicate).ToListAsync();
+        else
+        {
+            Console.WriteLine("Ogiltigt ID-format för SQLite.");
+        }
     }
 
     public async Task DeleteAsync(Product entity)
@@ -67,6 +77,10 @@ public class SQLiteRepository : IRepository<Product>
         await _context.SaveChangesAsync();
     }
 
+    public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
+    {
+        return await _dbSet.Where(predicate).ToListAsync();
+    }
 
     public async Task SaveChangesAsync()
     {

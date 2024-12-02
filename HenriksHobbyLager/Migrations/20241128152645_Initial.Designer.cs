@@ -10,9 +10,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HenriksHobbyLager.Migrations
 {
-    [DbContext(typeof(MongoDbContext))]
-    [Migration("20241127085543_AddProductIndexes")]
-    partial class AddProductIndexes
+    [DbContext(typeof(SQLiteDbContext))]
+    [Migration("20241128152645_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,6 +37,7 @@ namespace HenriksHobbyLager.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Price")

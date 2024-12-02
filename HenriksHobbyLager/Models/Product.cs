@@ -7,11 +7,17 @@ namespace HenriksHobbylager.Models;
 
 public class Product
 {
-    [Key]
-    [BsonId]
+    // MongoDB
+    [BsonId] 
     [BsonRepresentation(BsonType.ObjectId)]
+    public string? _id { get; set; }
+
+    // SQLite
+    [Key] 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public string? Id { get; set; }
+    [NotMapped] 
+    public int Id { get; set; }
+
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int Stock { get; set; }
