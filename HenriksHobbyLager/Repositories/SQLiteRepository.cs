@@ -25,7 +25,7 @@ public class SQLiteRepository : IRepository<Product>
         }
         else
         {
-            Console.WriteLine("Produkten finns redan i databasen.");
+            throw new Exception("Produkten finns redan i databasen.");
         }
     }
 
@@ -34,15 +34,32 @@ public class SQLiteRepository : IRepository<Product>
         return await _dbSet.Where(predicate).ToListAsync();
     }
 
-    public async Task<Product?> GetByIdAsync(string id)
+    public async Task<Product> GetByIdAsync(string id)
     {
+        if (int.TryParse(id, out var intId))
+        {
+            var entity = await _dbSet.FindAsync(intId);
+            if (entity != null)
+            {
+                return entity;
+            }
+          else
+            {
+                throw new Exception("Kunde inte hitta produkten.");
+            }
+        }
+        else
+        {
+            throw new Exception("Ogiltigt ID-format.");
+        }
+    }
+    /*{
         if (int.TryParse(id, out var intId))
         {
             return await _dbSet.FindAsync(intId);
         }
-        Console.WriteLine("Ogiltigt ID-format för SQLite.");
-        return null;
-    }
+        throw new Exception("Kunde inte hitta produkten.");
+    }*/
 
     public async Task UpdateAsync(Product entity)
     {
@@ -51,25 +68,11 @@ public class SQLiteRepository : IRepository<Product>
     }
 
     public async Task DeleteAsync(string id)
-    {
-        if (int.TryParse(id, out var intId))
-        {
-            var entity = await _dbSet.FindAsync(intId);
-            if (entity != null)
-            {
+    { var entity = await GetByIdAsync(id);
                 _dbSet.Remove(entity);
                 await _context.SaveChangesAsync();
             }
-            else
-            {
-                Console.WriteLine("Produkten kunde inte hittas.");
-            }
-        }
-        else
-        {
-            Console.WriteLine("Ogiltigt ID-format för SQLite.");
-        }
-    }
+        
 
     public async Task DeleteAsync(Product entity)
     {
@@ -86,4 +89,8 @@ public class SQLiteRepository : IRepository<Product>
     {
         await _context.SaveChangesAsync();
     }
+   
+    // felcheckar i SQLiteRepository  istället för CRUD menyn. Ex "Produkten tillag.." skrivs alltid ut även om det failar.
+//    Skapa en branch som heter refactor-faultyhandler merga inte in i dev.
+
 }

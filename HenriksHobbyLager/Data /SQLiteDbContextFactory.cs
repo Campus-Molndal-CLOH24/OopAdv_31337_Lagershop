@@ -8,9 +8,10 @@ namespace HenriksHobbylager.Data
         public SQLiteDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SQLiteDbContext>();
-            
+
             optionsBuilder.UseSqlite("Data Source=Data/hobbylager.db");
-            return new SQLiteDbContext(optionsBuilder.Options);
+            var sqliteDbContext = SQLiteDbContext.Instance(optionsBuilder.Options);
+            return sqliteDbContext;
         }
     }
 }
