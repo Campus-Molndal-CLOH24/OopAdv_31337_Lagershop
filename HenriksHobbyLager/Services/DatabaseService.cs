@@ -1,4 +1,4 @@
-using HenriksHobbylager.Models;
+/* using HenriksHobbylager.Models;
 using HenriksHobbylager.Repositories;
 
 namespace HenriksHobbyLager.services;
@@ -18,3 +18,4 @@ public abstract class DatabaseService<T> where T : class
 	}
 }
 
+ */

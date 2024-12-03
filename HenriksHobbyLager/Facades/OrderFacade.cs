@@ -1,4 +1,4 @@
-
+/* 
 using HenriksHobbylager.Models;
 using HenriksHobbylager.Repositories;
 using HenriksHobbyLager.Interface;
@@ -6,7 +6,7 @@ using HenriksHobbyLager.services;
 
 namespace HenriksHobbyLager.Facades;
 
-public class OrderFacade : DatabaseService, IOrderFacade
+public class OrderFacade : DatabaseService<Order>, IOrderFacade
 {
 	private readonly IRepository<Order> _repository;
 
@@ -54,10 +54,12 @@ public class OrderFacade : DatabaseService, IOrderFacade
 
 	public async Task<Order?> GetOrderByIdAsync(string orderId)
 	{
-		return await GetProductByIdAsync(_repository, orderId); // Använder basklassen
+		return await GetOrderByIdAsync(_repository, orderId); // Using the base class
 	}
 
-	public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+    
+
+    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
 	{
 		return await _repository.GetAllAsync(order => true);
 	}
@@ -67,3 +69,4 @@ public class OrderFacade : DatabaseService, IOrderFacade
 		throw new NotImplementedException();
 	}
 }
+ */
