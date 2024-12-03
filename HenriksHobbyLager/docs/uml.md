@@ -194,5 +194,4 @@ erDiagram
 
     Product ||--o{ OrderItem : "Länk till Orderns produkter"
     Order ||--o{ OrderItem : "Länk till produkter i en Order"
-
 ```

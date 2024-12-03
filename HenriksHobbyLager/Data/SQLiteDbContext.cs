@@ -6,6 +6,7 @@ public class SQLiteDbContext : DbContext
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Order> Orders { get; set; } = null!;
     public DbSet<OrderItem> OrderItems { get; set; } = null!;
+    public DbSet<Customer> Customers { get; set; } = null!;
     private static SQLiteDbContext? _instance;
 
     private static readonly object _lock = new();
@@ -56,5 +57,17 @@ public class SQLiteDbContext : DbContext
             .HasOne(oi => oi.Order)
             .WithMany(o => o.OrderItems)
             .HasForeignKey(oi => oi.OrderId);
+
+        modelBuilder.Entity<Customer>()
+            .ToTable("Customers");
+
+        modelBuilder.Entity<Customer>()
+            .HasKey(c => c.Id);
+
+        modelBuilder.Entity<Customer>()
+            .HasMany(c => c.Orders)
+            .WithOne(o => o.Customer)
+            .HasForeignKey(o => o.CustomerId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

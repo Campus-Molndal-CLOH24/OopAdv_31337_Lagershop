@@ -32,7 +32,7 @@ internal class ProductFacade : IProductFacade
 
         if (DatabaseType == "MongoDB" && string.IsNullOrEmpty(product._id))
         {
-            product._id = MongoDB.Bson.ObjectId.GenerateNewId().ToString(); // Sätt `_id` för MongoDB
+            product._id = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
         }
 
         await _repository.AddAsync(product);

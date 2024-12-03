@@ -24,8 +24,6 @@ internal class MenuCrud
 
         while (keepRunning)
         {
-
-
             Console.Clear();
             DisplayMenuHeader();
             Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
