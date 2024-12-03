@@ -1,5 +1,5 @@
-using HenriksHobbylager.Models;
 using HenriksHobbylager.Interface;
+using HenriksHobbylager.Models;
 using HenriksHobbyLager.UI;
 
 namespace HenriksHobbylager.UI;
@@ -7,22 +7,25 @@ namespace HenriksHobbylager.UI;
 internal class MenuCrud
 {
     private readonly IProductFacade _currentFacade;
-    private readonly IProductFacade _sqliteFacade;
     private readonly IProductFacade? _mongoFacade;
+    private readonly IProductFacade _sqliteFacade;
 
     public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProductFacade? mongoFacade)
     {
-        _currentFacade = currentFacade ?? throw new ArgumentNullException(nameof(currentFacade), "CurrentFacade är null.");
+        _currentFacade = currentFacade ??
+                         throw new ArgumentNullException(nameof(currentFacade), "CurrentFacade är null.");
         _sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade), "SQLiteFacade är null.");
         _mongoFacade = mongoFacade;
     }
 
     internal async Task ShowMenu()
     {
-        bool keepRunning = true;
+        var keepRunning = true;
 
         while (keepRunning)
         {
+
+
             Console.Clear();
             DisplayMenuHeader();
             Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
@@ -37,38 +40,44 @@ internal class MenuCrud
 
             var menuOption = Console.ReadLine();
             Console.Clear();
-
-            switch (menuOption)
+            try
             {
-                case "1":
-                    await AddProduct();
-                    break;
-                case "2":
-                    await DeleteProduct();
-                    break;
-                case "3":
-                    await UpdateProduct();
-                    break;
-                case "4":
-                    await SearchProducts();
-                    break;
-                case "5":
-                    await ShowAllProducts();
-                    break;
-                case "6":
-                    keepRunning = false;
-                    var menuDb = new MenuDb(_sqliteFacade, _mongoFacade);
-                    await menuDb.ShowMainMenuAsync();
-                    break;
-                case "0":
-                    ConsoleHelper.DisplayColourMessage(
-                        "Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
-                    Environment.Exit(0);
-                    break;
-                default:
-                    ConsoleHelper.DisplayColourMessage("Felaktigt val. Försök igen.", ConsoleColor.Red);
-                    Console.ResetColor();
-                    break;
+                switch (menuOption)
+                {
+                    case "1":
+                        await AddProduct();
+                        break;
+                    case "2":
+                        await DeleteProduct();
+                        break;
+                    case "3":
+                        await UpdateProduct();
+                        break;
+                    case "4":
+                        await SearchProducts();
+                        break;
+                    case "5":
+                        await ShowAllProducts();
+                        break;
+                    case "6":
+                        keepRunning = false;
+                        var menuDb = new MenuDb(_sqliteFacade, _mongoFacade);
+                        await menuDb.ShowMainMenuAsync();
+                        break;
+                    case "0":
+                        ConsoleHelper.DisplayColourMessage(
+                            "Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
+                        Environment.Exit(0);
+                        break;
+                    default:
+                        ConsoleHelper.DisplayColourMessage("Felaktigt val. Försök igen.", ConsoleColor.Red);
+                        Console.ResetColor();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                ConsoleHelper.DisplayColourMessage($"Ett oväntat fel inträffade: {ex.Message}", ConsoleColor.Red);
             }
 
             if (keepRunning)
@@ -204,14 +213,12 @@ internal class MenuCrud
             Console.WriteLine(new string('-', 50));
 
             foreach (var product in products)
-            {
                 Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10:C} | {4, -10}",
-                    product.DisplayId,  // Använder DisplayId
+                    product.DisplayId, // Använder DisplayId
                     product.Name,
                     product.Category,
                     product.Price,
                     product.Stock);
-            }
 
             ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
         }
