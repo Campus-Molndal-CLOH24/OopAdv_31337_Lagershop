@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HenriksHobbylager.Repositories;
 
-public class SQLiteRepository : IRepository<Product>
+internal class SQLiteRepository<T> where T : class
 {
     private readonly SQLiteDbContext _context;
     private readonly DbSet<Product> _dbSet;

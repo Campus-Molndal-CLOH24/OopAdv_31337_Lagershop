@@ -6,7 +6,7 @@ using MongoDB.Driver;
 
 namespace HenriksHobbylager.Repositories;
 
-public class MongoRepository : IRepository<Product>
+internal class MongoRepository<T> where T : class
 {
     private readonly IMongoCollection<Product> _collection;
 
