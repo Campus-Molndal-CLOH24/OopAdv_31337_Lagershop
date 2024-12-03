@@ -25,7 +25,7 @@ public class SQLiteRepository : IRepository<Product>
         }
         else
         {
-            Console.WriteLine("Produkten finns redan i databasen.");
+            throw new Exception("Produkten finns redan i databasen.");
         }
     }
 
@@ -34,11 +34,25 @@ public class SQLiteRepository : IRepository<Product>
         return await _dbSet.Where(predicate).ToListAsync();
     }
 
-    public async Task<Product?> GetByIdAsync(string? id)
+    public async Task<Product> GetByIdAsync(string id)
     {
-        return await _dbSet.FindAsync(id);
+        if (int.TryParse(id, out var intId))
+        {
+            var entity = await _dbSet.FindAsync(intId);
+            if (entity != null)
+            {
+                return entity;
+            }
+          else
+            {
+                throw new Exception("Kunde inte hitta produkten.");
+            }
+        }
+        else
+        {
+            throw new Exception("Ogiltigt ID-format.");
+        }
     }
-
 
     public async Task UpdateAsync(Product entity)
     {
@@ -47,18 +61,9 @@ public class SQLiteRepository : IRepository<Product>
     }
 
     public async Task DeleteAsync(string id)
-    {
-        var entity = await _dbSet.FindAsync(id);
-        if (entity != null)
-        {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
-    {
-        return await _dbSet.Where(predicate).ToListAsync();
+    { var entity = await GetByIdAsync(id);
+        _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(Product entity)
@@ -67,6 +72,10 @@ public class SQLiteRepository : IRepository<Product>
         await _context.SaveChangesAsync();
     }
 
+    public async Task<IEnumerable<Product>> SearchAsync(Expression<Func<Product, bool>> predicate)
+    {
+        return await _dbSet.Where(predicate).ToListAsync();
+    }
 
     public async Task SaveChangesAsync()
     {
