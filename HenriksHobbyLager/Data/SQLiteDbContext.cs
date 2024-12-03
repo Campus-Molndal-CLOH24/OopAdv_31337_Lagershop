@@ -6,8 +6,26 @@ public class SQLiteDbContext : DbContext
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<Order> Orders { get; set; } = null!;
     public DbSet<OrderItem> OrderItems { get; set; } = null!;
+    private static SQLiteDbContext? _instance;
 
-    public SQLiteDbContext(DbContextOptions<SQLiteDbContext> options) : base(options) { }
+    private static readonly object _lock = new();
+
+    internal SQLiteDbContext(DbContextOptions<SQLiteDbContext> options) : base(options) { }
+
+    public static SQLiteDbContext Instance(DbContextOptions<SQLiteDbContext> options)
+    {
+        if (_instance == null)
+        {
+            lock (_lock)
+            {
+                if (_instance == null)
+                {
+                    _instance = new SQLiteDbContext(options);
+                }
+            }
+        }
+        return _instance;
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
