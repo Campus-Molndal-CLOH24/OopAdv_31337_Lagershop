@@ -23,80 +23,82 @@ internal class MenuCrud
         var keepRunning = true;
 
         while (keepRunning)
+        {
 
 
             Console.Clear();
-        DisplayMenuHeader();
-        Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
-        Console.WriteLine("1. Lägg till en produkt");
-        Console.WriteLine("2. Ta bort en produkt");
-        Console.WriteLine("3. Uppdatera en produkt");
-        Console.WriteLine("4. Sök igenom produkterna");
-        Console.WriteLine("5. Visa alla produkterna");
-        Console.WriteLine("6. Gå tillbaka till databasmenyn");
-        Console.WriteLine("0. Avsluta");
-        Console.Write("\nVälj ett alternativ: ");
+            DisplayMenuHeader();
+            Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
+            Console.WriteLine("1. Lägg till en produkt");
+            Console.WriteLine("2. Ta bort en produkt");
+            Console.WriteLine("3. Uppdatera en produkt");
+            Console.WriteLine("4. Sök igenom produkterna");
+            Console.WriteLine("5. Visa alla produkterna");
+            Console.WriteLine("6. Gå tillbaka till databasmenyn");
+            Console.WriteLine("0. Avsluta");
+            Console.Write("\nVälj ett alternativ: ");
 
-        var menuOption = Console.ReadLine();
-        Console.Clear();
-        try
-        {
-            switch (menuOption)
+            var menuOption = Console.ReadLine();
+            Console.Clear();
+            try
             {
-                case "1":
-                    await AddProduct();
-                    break;
-                case "2":
-                    await DeleteProduct();
-                    break;
-                case "3":
-                    await UpdateProduct();
-                    break;
-                case "4":
-                    await SearchProducts();
-                    break;
-                case "5":
-                    await ShowAllProducts();
-                    break;
-                case "6":
-                    keepRunning = false;
-                    var menuDb = new MenuDb(_sqliteFacade, _mongoFacade);
-                    await menuDb.ShowMainMenuAsync();
-                    break;
-                case "0":
+                switch (menuOption)
+                {
+                    case "1":
+                        await AddProduct();
+                        break;
+                    case "2":
+                        await DeleteProduct();
+                        break;
+                    case "3":
+                        await UpdateProduct();
+                        break;
+                    case "4":
+                        await SearchProducts();
+                        break;
+                    case "5":
+                        await ShowAllProducts();
+                        break;
+                    case "6":
+                        keepRunning = false;
+                        var menuDb = new MenuDb(_sqliteFacade, _mongoFacade);
+                        await menuDb.ShowMainMenuAsync();
+                        break;
+                    case "0":
+                        ConsoleHelper.DisplayColourMessage(
+                            "Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
+                        Environment.Exit(0);
+                        break;
+                    default:
+                        ConsoleHelper.DisplayColourMessage("Felaktigt val. Försök igen.", ConsoleColor.Red);
+                        Console.ResetColor();
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                ConsoleHelper.DisplayColourMessage($"Ett oväntat fel inträffade: {ex.Message}", ConsoleColor.Red);
+            }
+
+            if (keepRunning)
+            {
+                Console.WriteLine("\nVill du visa menyn igen eller avsluta?");
+                Console.WriteLine("1. Visa menyn igen");
+                Console.WriteLine("0. Avsluta");
+                Console.Write("\nVälj ett alternativ: ");
+                var choice = Console.ReadLine();
+
+                if (choice == "0")
+                {
                     ConsoleHelper.DisplayColourMessage(
                         "Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
                     Environment.Exit(0);
-                    break;
-                default:
-                    ConsoleHelper.DisplayColourMessage("Felaktigt val. Försök igen.", ConsoleColor.Red);
-                    Console.ResetColor();
-                    break;
-            }
-        }
-        catch (Exception ex)
-        {
-            ConsoleHelper.DisplayColourMessage($"Ett oväntat fel inträffade: {ex.Message}", ConsoleColor.Red);
-        }
-
-        if (keepRunning)
-        {
-            Console.WriteLine("\nVill du visa menyn igen eller avsluta?");
-            Console.WriteLine("1. Visa menyn igen");
-            Console.WriteLine("0. Avsluta");
-            Console.Write("\nVälj ett alternativ: ");
-            var choice = Console.ReadLine();
-
-            if (choice == "0")
-            {
-                ConsoleHelper.DisplayColourMessage(
-                    "Programmet avslutas. Tack för att du använde Henriks Hobbylager!", ConsoleColor.Green);
-                Environment.Exit(0);
-            }
-            else if (choice != "1")
-            {
-                ConsoleHelper.DisplayColourMessage("Felaktigt val. Programmet avslutas.", ConsoleColor.Red);
-                Environment.Exit(0);
+                }
+                else if (choice != "1")
+                {
+                    ConsoleHelper.DisplayColourMessage("Felaktigt val. Programmet avslutas.", ConsoleColor.Red);
+                    Environment.Exit(0);
+                }
             }
         }
     }
