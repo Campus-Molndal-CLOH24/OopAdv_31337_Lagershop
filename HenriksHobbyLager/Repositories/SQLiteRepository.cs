@@ -20,7 +20,7 @@ public class SQLiteRepository : IRepository<Product>
     {
         if (!await _dbSet.AnyAsync(p => p.Name == entity.Name))
         {
-            await _dbSet.AddAsync(entity); // SQLite kommer generera Id
+            await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
         }
         else
@@ -53,13 +53,6 @@ public class SQLiteRepository : IRepository<Product>
             throw new Exception("Ogiltigt ID-format.");
         }
     }
-    /*{
-        if (int.TryParse(id, out var intId))
-        {
-            return await _dbSet.FindAsync(intId);
-        }
-        throw new Exception("Kunde inte hitta produkten.");
-    }*/
 
     public async Task UpdateAsync(Product entity)
     {
@@ -69,10 +62,9 @@ public class SQLiteRepository : IRepository<Product>
 
     public async Task DeleteAsync(string id)
     { var entity = await GetByIdAsync(id);
-                _dbSet.Remove(entity);
-                await _context.SaveChangesAsync();
-            }
-        
+        _dbSet.Remove(entity);
+        await _context.SaveChangesAsync();
+    }
 
     public async Task DeleteAsync(Product entity)
     {
@@ -89,8 +81,4 @@ public class SQLiteRepository : IRepository<Product>
     {
         await _context.SaveChangesAsync();
     }
-   
-    // felcheckar i SQLiteRepository  istället för CRUD menyn. Ex "Produkten tillag.." skrivs alltid ut även om det failar.
-//    Skapa en branch som heter refactor-faultyhandler merga inte in i dev.
-
 }

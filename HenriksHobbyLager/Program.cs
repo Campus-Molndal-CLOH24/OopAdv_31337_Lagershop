@@ -1,5 +1,4 @@
-﻿using HenriksHobbylager.Data;
-using HenriksHobbylager.Data.MongoDb;
+﻿using HenriksHobbylager.Data.MongoDb;
 using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Repositories;
 using HenriksHobbylager.Interface;
