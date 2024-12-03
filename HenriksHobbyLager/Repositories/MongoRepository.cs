@@ -34,9 +34,26 @@ public class MongoRepository : IRepository<Product>
 
     public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
     {
-        // Returnera alla produkter som matchar predicate
-        return await _collection.Find(predicate).ToListAsync();
+        Console.WriteLine($"Running GetAllAsync with predicate: {predicate.Body}"); // Temp: Debug line
+
+        if (predicate.Body is ConstantExpression constant && constant.Value is true)
+        {
+            Console.WriteLine("Fetching all products (no filter)"); // Temp: Debug line
+                                                                    // Returnera alla dokument om predikatet är `p => true`
+            return await _collection.Find(FilterDefinition<Product>.Empty).ToListAsync();
+        }
+
+        Console.WriteLine("Applying filter to products"); // Temp: Debug line
+                                                          // Annars använd predikatet
+        return _collection.AsQueryable().Where(predicate.Compile()).ToList(); // Synkron ToList
     }
+
+
+    //public async Task<IEnumerable<Product>> GetAllAsync(Expression<Func<Product, bool>> predicate)
+    //{
+    //    // Returnera alla produkter som matchar predicate
+    //    return await _collection.Find(predicate).ToListAsync();
+    //}
 
     public async Task<Product?> GetByIdAsync(string id)
     {

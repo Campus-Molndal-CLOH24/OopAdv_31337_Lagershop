@@ -1,23 +1,28 @@
 using HenriksHobbylager.UI;
-using HenriksHobbylager.Interface;
+using HenriksHobbyLager.Facades;
 using HenriksHobbyLager.UI;
 
 namespace HenriksHobbylager;
 
 internal class MenuDb
 {
-    private readonly IProductFacade _sqliteFacade;
-    private readonly IProductFacade _mongoFacade;
+    private readonly SQLiteFacade _sqliteFacade;
+    private readonly MongoDbFacade _mongoFacade;
 
-    public MenuDb(IProductFacade sqliteFacade, IProductFacade mongoFacade)
+    public MenuDb(SQLiteFacade sqliteFacade, MongoDbFacade mongoFacade)
     {
         _sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade), "SQLite-fasaden är null.");
         _mongoFacade = mongoFacade ?? throw new ArgumentNullException(nameof(mongoFacade), "MongoDB-fasaden är null.");
+        Console.WriteLine($"SQLite Fasad: {_sqliteFacade}");
+        Console.WriteLine($"MongoDB Fasad: {_mongoFacade}");
     }
 
     public async Task ShowMainMenuAsync()
     {
-        Console.Clear();
+        Console.WriteLine($"SQLite Fasad: {_sqliteFacade.DatabaseType}"); // Temp: Debug line
+        Console.WriteLine($"MongoDB Fasad: {_mongoFacade?.DatabaseType ?? "Ej konfigurerad"}"); // Temp: Debug line
+
+        // Console.Clear();  // Temp: döljer denna tills vi kunnat debugga färdigt vilken databas vi ansluter till där ovan
         ConsoleHelper.DisplayColourMessage("========================================", ConsoleColor.Green);
         ConsoleHelper.DisplayColourMessage("       🎉 Henriks Hobbylager 🎉        ", ConsoleColor.Green);
         ConsoleHelper.DisplayColourMessage("========================================", ConsoleColor.Green);
@@ -37,31 +42,11 @@ internal class MenuDb
         switch (menuOption)
         {
             case "1":
-                if (_sqliteFacade == null)
-                {
-                    ConsoleHelper.DisplayColourMessage("❌ SQLite-fasaden är inte korrekt konfigurerad.", ConsoleColor.Red);
-                    return;
-                }
-
-                Console.Clear();
-                ConsoleHelper.DisplayColourMessage("🔧 Öppnar SQLite...", ConsoleColor.Cyan);
-                await Task.Delay(1000);
-                var menuSQLite = new MenuCrud(_sqliteFacade, _sqliteFacade, _mongoFacade);
-                await menuSQLite.ShowMenu();
+                await OpenSQLiteMenuAsync();
                 break;
 
             case "2":
-                if (_mongoFacade == null)
-                {
-                    ConsoleHelper.DisplayColourMessage("❌ MongoDB-fasaden är inte korrekt konfigurerad.", ConsoleColor.Red);
-                    return;
-                }
-
-                Console.Clear();
-                ConsoleHelper.DisplayColourMessage("🌐 Öppnar MongoDB...", ConsoleColor.Cyan);
-                await Task.Delay(1000);
-                var menuMongo = new MenuCrud(_mongoFacade, _sqliteFacade, _mongoFacade);
-                await menuMongo.ShowMenu();
+                await OpenMongoDBMenuAsync();
                 break;
 
             case "0":
@@ -75,5 +60,29 @@ internal class MenuDb
                 Console.ResetColor();
                 break;
         }
+    }
+
+    private async Task OpenSQLiteMenuAsync()
+    {
+        if (_sqliteFacade == null)
+        {
+            ConsoleHelper.DisplayColourMessage("SQLite-fasaden är inte korrekt konfigurerad.", ConsoleColor.Red);
+            return;
+        }
+
+        var menuSQLite = new MenuCrud(_sqliteFacade, null); // Endast SQLite används
+        await menuSQLite.ShowMenu();
+    }
+
+    private async Task OpenMongoDBMenuAsync()
+    {
+        if (_mongoFacade == null)
+        {
+            ConsoleHelper.DisplayColourMessage("MongoDB-fasaden är inte korrekt konfigurerad.", ConsoleColor.Red);
+            return;
+        }
+
+        var menuMongo = new MenuCrud(null, _mongoFacade); // Endast MongoDB används
+        await menuMongo.ShowMenu();
     }
 }

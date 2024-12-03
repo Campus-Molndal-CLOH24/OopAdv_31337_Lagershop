@@ -1,19 +1,23 @@
 using HenriksHobbylager.Models;
-using HenriksHobbylager.Interface;
 using HenriksHobbyLager.UI;
+using HenriksHobbyLager.Facades;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HenriksHobbylager.UI;
 
 internal class MenuCrud
 {
-    private readonly IProductFacade _currentFacade;
-    private readonly IProductFacade _sqliteFacade;
-    private readonly IProductFacade? _mongoFacade;
+    private readonly SQLiteFacade? _sqliteFacade;
+    private readonly MongoDbFacade? _mongoFacade;
 
-    public MenuCrud(IProductFacade currentFacade, IProductFacade sqliteFacade, IProductFacade? mongoFacade)
+    public MenuCrud(SQLiteFacade? sqliteFacade = null, MongoDbFacade? mongoFacade = null)
     {
-        _currentFacade = currentFacade ?? throw new ArgumentNullException(nameof(currentFacade), "CurrentFacade är null.");
-        _sqliteFacade = sqliteFacade ?? throw new ArgumentNullException(nameof(sqliteFacade), "SQLiteFacade är null.");
+        if (sqliteFacade == null && mongoFacade == null)
+        {
+            throw new ArgumentException("Minst en fasad måste vara tillgänglig.");
+        }
+
+        _sqliteFacade = sqliteFacade;
         _mongoFacade = mongoFacade;
     }
 
@@ -25,7 +29,9 @@ internal class MenuCrud
         {
             Console.Clear();
             DisplayMenuHeader();
-            Console.WriteLine($"Använder: {_currentFacade.DatabaseType}.");
+
+            Console.WriteLine($"Aktiv databas: {(_sqliteFacade != null ? "SQLite" : "MongoDB")}");
+
             Console.WriteLine("1. Lägg till en produkt");
             Console.WriteLine("2. Ta bort en produkt");
             Console.WriteLine("3. Uppdatera en produkt");
@@ -41,23 +47,29 @@ internal class MenuCrud
             switch (menuOption)
             {
                 case "1":
+                    DebugCurrentFacade(); // Temp: Debug method
                     await AddProduct();
                     break;
                 case "2":
+                    DebugCurrentFacade(); // Temp: Debug method
                     await DeleteProduct();
                     break;
                 case "3":
+                    DebugCurrentFacade(); // Temp: Debug method
                     await UpdateProduct();
                     break;
                 case "4":
+                    DebugCurrentFacade(); // Temp: Debug method
                     await SearchProducts();
                     break;
                 case "5":
+                    DebugCurrentFacade(); // Temp: Debug method
                     await ShowAllProducts();
                     break;
                 case "6":
                     keepRunning = false;
-                    var menuDb = new MenuDb(_sqliteFacade, _mongoFacade);
+                    var serviceProvider = Program.ConfigureServices(); // Skapar DI-container
+                    var menuDb = serviceProvider.GetRequiredService<MenuDb>();
                     await menuDb.ShowMainMenuAsync();
                     break;
                 case "0":
@@ -105,25 +117,18 @@ internal class MenuCrud
 
     private async Task AddProduct()
     {
-        var name = ConsoleHelper.GetNonNullInput("Ange produktnamn: ");
-        var category = ConsoleHelper.GetNonNullInput("Ange kategori: ");
-
-        Console.WriteLine("Ange pris:");
-        if (!decimal.TryParse(Console.ReadLine(), out var price))
+        if (_sqliteFacade != null)
         {
-            ConsoleHelper.DisplayColourMessage("Ogiltigt pris. Försök igen.", ConsoleColor.Red);
-            return;
+            await AddProductSQLite();
         }
-
-        Console.WriteLine("Ange lagerantal:");
-        if (!int.TryParse(Console.ReadLine(), out var stock))
+        else if (_mongoFacade != null)
         {
-            ConsoleHelper.DisplayColourMessage("Ogiltigt lagerantal. Försök igen.", ConsoleColor.Red);
-            return;
+            await AddProductMongo();
         }
-
-        await _currentFacade.CreateProductAsync(name, stock, price, category);
-        ConsoleHelper.DisplayColourMessage("Produkten lades till.", ConsoleColor.Green);
+        else
+        {
+            Console.WriteLine("❌ Ingen fasad är konfigurerad.");
+        }
     }
 
     private async Task DeleteProduct()
@@ -133,7 +138,20 @@ internal class MenuCrud
 
         try
         {
-            await _currentFacade.DeleteProductAsync(id);
+            if (_sqliteFacade != null)
+            {
+                await _sqliteFacade.DeleteProductAsync(id);
+            }
+            else if (_mongoFacade != null)
+            {
+                await _mongoFacade.DeleteProductAsync(id);
+            }
+            else
+            {
+                ConsoleHelper.DisplayColourMessage("Ingen fasad är konfigurerad för att radera produkter.", ConsoleColor.Red);
+                return;
+            }
+
             ConsoleHelper.DisplayColourMessage("Produkten har tagits bort.", ConsoleColor.Green);
         }
         catch (ArgumentException ex)
@@ -148,8 +166,18 @@ internal class MenuCrud
 
     private async Task UpdateProduct()
     {
-        var id = ConsoleHelper.GetNonNullInput("Ange ID för produkten som ska uppdateras: ");
-        var product = await _currentFacade.GetProductByIdAsync(id);
+        Console.Write("Ange ID för produkten som ska uppdateras: ");
+        var id = ConsoleHelper.GetNonNullInput("Ange produktens ID: ");
+        Product? product = null;
+
+        if (_sqliteFacade != null)
+        {
+            product = await _sqliteFacade.GetProductByIdAsync(id);
+        }
+        else if (_mongoFacade != null)
+        {
+            product = await _mongoFacade.GetProductByIdAsync(id);
+        }
 
         if (product == null)
         {
@@ -157,8 +185,7 @@ internal class MenuCrud
             return;
         }
 
-        Console.WriteLine(
-            $"Uppdaterar produkt: ID: {product.Id}, Namn: {product.Name}, Kategori: {product.Category}, Pris: {product.Price}, Lager: {product.Stock}");
+        Console.WriteLine($"Uppdaterar produkt: ID: {product.Id}, Namn: {product.Name}, Kategori: {product.Category}, Pris: {product.Price}, Lager: {product.Stock}");
         Console.Write("Ange nytt namn (eller tryck Enter för att behålla): ");
         var newName = Console.ReadLine();
         if (!string.IsNullOrWhiteSpace(newName)) product.Name = newName;
@@ -173,51 +200,118 @@ internal class MenuCrud
         Console.Write("Ange nytt lagerantal (eller tryck Enter för att behålla): ");
         if (int.TryParse(Console.ReadLine(), out var newStock)) product.Stock = newStock;
 
-        await _currentFacade.UpdateProductAsync(product);
+        if (_sqliteFacade != null)
+        {
+            await _sqliteFacade.UpdateProductAsync(product);
+        }
+        else if (_mongoFacade != null)
+        {
+            await _mongoFacade.UpdateProductAsync(product);
+        }
+
         ConsoleHelper.DisplayColourMessage("Produkten har uppdaterats.", ConsoleColor.Green);
     }
-
     private async Task SearchProducts()
     {
         var searchTerm = ConsoleHelper.GetNonNullInput("Ange sökterm: ");
-        var products = await _currentFacade.SearchProductsAsync(searchTerm);
+        IEnumerable<Product> products;
+
+        if (_sqliteFacade != null)
+        {
+            products = await _sqliteFacade.SearchProductsAsync(searchTerm);
+        }
+        else if (_mongoFacade != null)
+        {
+            products = await _mongoFacade.SearchProductsAsync(searchTerm);
+        }
+        else
+        {
+            ConsoleHelper.DisplayColourMessage("Ingen fasad är konfigurerad för att söka produkter.", ConsoleColor.Red);
+            return;
+        }
 
         ShowSearchResults(products, "SÖKRESULTAT");
     }
 
-    private async Task ShowAllProducts()
-    {
-        var products = await _currentFacade.GetAllProductsAsync();
-        ShowSearchResults(products, "PRODUKTKATALOG");
-    }
 
     private void ShowSearchResults(IEnumerable<Product> products, string header)
     {
-        if (products.Any())
+        Console.WriteLine($"=== {header} ===");
+        foreach (var product in products)
         {
-            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
-            ConsoleHelper.DisplayColourMessage($"               {header}                 ", ConsoleColor.Cyan);
-            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+            Console.WriteLine($"- {product.Name} | {product.Category} | {product.Price:C} | {product.Stock}");
+        }
+    }
 
-            Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10} | {4, -10} ", "ID", "Namn", "Kategori", "Pris",
-                "Lager");
-            Console.WriteLine(new string('-', 50));
-
-            foreach (var product in products)
-            {
-                Console.WriteLine("{0, -5} | {1, -20} | {2, -10} | {3, -10:C} | {4, -10}",
-                    product.DisplayId,  // Använder DisplayId
-                    product.Name,
-                    product.Category,
-                    product.Price,
-                    product.Stock);
-            }
-
-            ConsoleHelper.DisplayColourMessage("=========================================", ConsoleColor.Cyan);
+    private async Task ShowAllProducts()
+    {
+        if (_sqliteFacade != null)
+        {
+            var products = await _sqliteFacade.GetAllProductsAsync();
+            ShowProducts(products);
+        }
+        else if (_mongoFacade != null)
+        {
+            var products = await _mongoFacade.GetAllProductsAsync();
+            ShowProducts(products);
         }
         else
         {
-            ConsoleHelper.DisplayColourMessage("Inga produkter hittades.", ConsoleColor.Red);
+            ConsoleHelper.DisplayColourMessage("Ingen fasad är konfigurerad för att visa produkter.", ConsoleColor.Red);
         }
     }
+
+    private void ShowProducts(IEnumerable<Product> products)
+    {
+        if (products.Any())
+        {
+            Console.WriteLine("========================================");
+            Console.WriteLine("               PRODUKTKATALOG            ");
+            Console.WriteLine("========================================");
+            foreach (var product in products)
+            {
+                Console.WriteLine($"{product.Name} | {product.Category} | {product.Price} | {product.Stock}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("Inga produkter hittades.");
+        }
+    }
+    private async Task AddProductSQLite()
+    {
+        var name = ConsoleHelper.GetNonNullInput("Ange produktnamn: ");
+        var category = ConsoleHelper.GetNonNullInput("Ange kategori: ");
+        Console.WriteLine("Ange pris:");
+        if (!decimal.TryParse(Console.ReadLine(), out var price)) return;
+        Console.WriteLine("Ange lagerantal:");
+        if (!int.TryParse(Console.ReadLine(), out var stock)) return;
+
+        await _sqliteFacade!.CreateProductAsync(name, stock, price, category);
+    }
+
+    private async Task AddProductMongo()
+    {
+        var name = ConsoleHelper.GetNonNullInput("Ange produktnamn: ");
+        var category = ConsoleHelper.GetNonNullInput("Ange kategori: ");
+        Console.WriteLine("Ange pris:");
+        if (!decimal.TryParse(Console.ReadLine(), out var price)) return;
+        Console.WriteLine("Ange lagerantal:");
+        if (!int.TryParse(Console.ReadLine(), out var stock)) return;
+
+        await _mongoFacade!.CreateProductAsync(name, stock, price, category);
+    }
+
+    private void DebugCurrentFacade()
+    {
+        if (_sqliteFacade != null)
+        {
+            Console.WriteLine($"Använder SQLite-fasaden: {_sqliteFacade.DatabaseType}");
+        }
+        if (_mongoFacade != null)
+        {
+            Console.WriteLine($"Använder MongoDB-fasaden: {_mongoFacade.DatabaseType}");
+        }
+    }
+
 }

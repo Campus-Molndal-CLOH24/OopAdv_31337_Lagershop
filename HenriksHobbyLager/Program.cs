@@ -1,10 +1,10 @@
-﻿using HenriksHobbylager.Data;
-using HenriksHobbylager.Data.MongoDb;
+﻿using HenriksHobbylager.Data.MongoDb;
 using HenriksHobbyLager.Facades;
 using HenriksHobbylager.Repositories;
-using HenriksHobbylager.Interface;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using HenriksHobbylager.Models;
 
 namespace HenriksHobbylager;
 
@@ -12,56 +12,84 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .Build();
-
-        var sqliteFacade = ConfigureSQLiteFacade(configuration);
-        var mongoFacade = ConfigureMongoDbFacade(configuration);
-
-        var mainMenu = new MenuDb(sqliteFacade, mongoFacade);
+        var serviceProvider = ConfigureServices();
+        var mainMenu = serviceProvider.GetRequiredService<MenuDb>();
         await mainMenu.ShowMainMenuAsync();
     }
 
-    private static IProductFacade ConfigureSQLiteFacade(IConfiguration configuration)
+    // Building the service provider
+    internal static ServiceProvider ConfigureServices()
     {
-        var dbPath = configuration["ConnectionStrings:DatabasePath"];
-        if (string.IsNullOrEmpty(dbPath))
+        // Build configuration
+        var configuration = new ConfigurationBuilder()
+        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .Build();
+
+        var services = new ServiceCollection();
+
+        // Adding the configuration to the DI-container
+        services.AddSingleton<IConfiguration>(configuration);
+
+        // SQLite-configuration
+        services.AddScoped<SQLiteDbContext>(provider =>
         {
-            throw new ArgumentNullException("DatabasePath saknas i appsettings.json");
-        }
-
-        var options = new DbContextOptionsBuilder<SQLiteDbContext>()
-            .UseSqlite($"Data Source={dbPath}")
-            .Options;
-
-        var sqliteDbContext = new SQLiteDbContext(options);
-        var sqliteRepository = new SQLiteRepository(sqliteDbContext);
-        return new ProductFacade(sqliteRepository);
-    }
-
-    private static IProductFacade? ConfigureMongoDbFacade(IConfiguration configuration)
-    {
-        try
-        {
-            var mongoConnectionString = configuration.GetConnectionString("MongoDbConnection");
-            var mongoDatabaseName = configuration["ConnectionStrings:MongoDbName"];
-
-            if (string.IsNullOrWhiteSpace(mongoConnectionString) || string.IsNullOrWhiteSpace(mongoDatabaseName))
+            var config = provider.GetRequiredService<IConfiguration>();
+            var dbPath = config["ConnectionStrings:DatabasePath"];
+            if (string.IsNullOrEmpty(dbPath))
             {
-                Console.WriteLine("❌ MongoDB-konfigurationen saknas eller är ofullständig.");
-                return null;
+                throw new ArgumentNullException("DatabasePath saknas i appsettings.json");
             }
 
-            var mongoDbContext = MongoDbContext.Instance(mongoConnectionString, mongoDatabaseName);
-            var mongoRepository = new MongoRepository(mongoDbContext);
-            return new ProductFacade(mongoRepository);
-        }
-        catch (Exception ex)
+            var options = new DbContextOptionsBuilder<SQLiteDbContext>()
+                .UseSqlite($"Data Source={dbPath}")
+                .Options;
+
+            return new SQLiteDbContext(options);
+        });
+        services.AddScoped<IRepository<Product>, SQLiteRepository>();
+        services.AddScoped<SQLiteFacade>(provider =>
         {
-            Console.WriteLine($"❌ Ett fel inträffade när MongoDB-fasaden skulle skapas: {ex.Message}");
-            return null;
-        }
+            var dbContext = provider.GetRequiredService<SQLiteDbContext>();
+            var repository = new SQLiteRepository(dbContext);
+            return new SQLiteFacade(repository);
+        });
+
+        // MongoDB-configuration
+        services.AddScoped<MongoDbContext>(provider =>
+        {
+            var config = provider.GetRequiredService<IConfiguration>();
+            var mongoConnectionString = config.GetConnectionString("MongoDbConnection");
+            var dbName = config["ConnectionStrings:MongoDbName"];
+
+            if (string.IsNullOrWhiteSpace(mongoConnectionString) || string.IsNullOrWhiteSpace(dbName))
+            {
+                throw new ArgumentException("MongoDB-konfigurationen saknas eller är ofullständig.");
+            }
+
+            return MongoDbContext.Instance(mongoConnectionString, dbName);
+        });
+
+        services.AddScoped<IRepository<Product>, MongoRepository>();
+        services.AddScoped<MongoDbFacade>(provider =>
+        {
+            var mongoDbContext = provider.GetRequiredService<MongoDbContext>();
+            var repository = new MongoRepository(mongoDbContext);
+            return new MongoDbFacade(repository);
+        });
+
+        // Setting up the MenuDb
+        services.AddScoped<MenuDb>(provider =>
+        {
+            var sqliteFacade = provider.GetRequiredService<SQLiteFacade>();
+            var mongoFacade = provider.GetService<MongoDbFacade>(); // Se till att den inte är null
+            if (mongoFacade == null)
+            {
+                throw new InvalidOperationException("MongoDB-fasaden är inte korrekt registrerad.");
+            }
+            return new MenuDb(sqliteFacade, mongoFacade);
+        });
+
+        return services.BuildServiceProvider();
     }
 }
