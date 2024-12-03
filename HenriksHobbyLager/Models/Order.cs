@@ -2,6 +2,7 @@
 
 namespace HenriksHobbylager.Models;
 
+// order
 public class Order
 {
 	[Key]
